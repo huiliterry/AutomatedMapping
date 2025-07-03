@@ -1,38 +1,6 @@
 # %% [markdown]
 # Trusted Pixels
 
-# %%
-# Trusted pixels extraction
-def trustedPixels(year,gap):
-
-  def getCDLbyYear(year):
-      return ee.Image('USDA/NASS/CDL/'+year).select('cropland')
-
-  gap = gap - 1
-  # year = 2025
-  oneYearList = list(range(year-gap,year))
-  # print(oneYearList)
-  twoYearList = oneYearList[0:gap:2]
-  # print(twoYearList)
-
-  oneYearListCdl = ee.ImageCollection(list(map(getCDLbyYear, list(map(str, oneYearList)))))
-  twoYearListCdl = ee.ImageCollection(list(map(getCDLbyYear, list(map(str, twoYearList)))))
-  # display(oneYearListCdl,twoYearListCdl)
-
-  # Calculate the standard deviation across the ImageCollection to find constant pixels.
-  # Create a mask where the standard deviation is zero (constant pixels).
-  oneYearconstant_mask = oneYearListCdl.reduce(ee.Reducer.stdDev()).eq(0)
-  twoYearconstant_mask = twoYearListCdl.reduce(ee.Reducer.stdDev()).eq(0)
-
-  oneYearTrusted = twoYearListCdl.first().updateMask(oneYearconstant_mask)
-  twoYearTrusted = twoYearListCdl.first().updateMask(twoYearconstant_mask)
-  # display(oneYearTrusted,twoYearTrusted)
-
-  # Merge the two trusted images
-  UStrustedpixel = ee.ImageCollection([oneYearTrusted, twoYearTrusted]).mosaic()
-
-  return UStrustedpixel
-
 # %% [markdown]
 # Processing - Mosaic L89 and S2 (S2 cover L89)
 
@@ -664,6 +632,7 @@ from googleapiclient.http import MediaIoBaseDownload
 import shutil
 import numpy as np
 from multiprocessing import Process
+import TrustedPixel
 
 # Path to your downloaded JSON key
 SERVICE_ACCOUNT = 'automatedmapping@ee-huil7073.iam.gserviceaccount.com'
@@ -682,8 +651,8 @@ endDate = str(year) + "-07-01"
 month = "June"
 
 S2cloudCover = 15
-L89cloudCover = 20
-CONUStrainingLabel = trustedPixels(year,7)
+L89cloudCover = 20 
+CONUStrainingLabel = TrustedPixel.trustedPixels(year,7)
 
 root_path = '/content/drive/MyDrive/'
 L89tileFolder = 'AutoInseasonL89_MappingTest'
