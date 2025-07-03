@@ -1,46 +1,4 @@
-# %% [markdown]
-# Trusted Pixels
-
-# %% [markdown]
-# Processing - Mosaic L89 and S2 (S2 cover L89)
-
-# %%
-def mosaic_L89_S2_gdal(output_path,month,L89name, S2name):
-  l89_path = os.path.join(output_path, month + L89name)
-  s2_path = os.path.join(output_path, month + S2name)
-  if not os.path.exists(l89_path) or not os.path.exists(s2_path):
-    raise FileNotFoundError("One or both classification TIFFs are missing. Mosaic step aborted.")
-
-  input_files = [
-      l89_path,
-      s2_path
-  ]
-
-  vrt_path = os.path.join(output_path, 'temp_mosaic.vrt')
-  mosaic_output = os.path.join(output_path, f"{month}_L89_S2_merged.tif")
-
-  # 1. Build virtual mosaic
-  vrt_options = gdal.BuildVRTOptions(srcNodata=0, VRTNodata=0)  # if 0 is NoData
-  gdal.BuildVRT(vrt_path, input_files, options=vrt_options)
-
-  # 2. Translate VRT to GeoTIFF using parallel write
-  translate_options = gdal.TranslateOptions(format='GTiff', creationOptions=[
-      'TILED=YES',
-      'COMPRESS=LZW',
-      'BIGTIFF=YES',
-      'NUM_THREADS=ALL_CPUS'
-  ])
-  gdal.Translate(mosaic_output, vrt_path, options=translate_options)
-
-  # 3. Cleanup
-  os.remove(vrt_path)
-
-  print("Mosaic saved to:", mosaic_output)
-
-# %% [markdown]
-# Delete specific folder
-
-# %%
+# Delete specific folder# %%
 def delete_folder(folder_path_to_delete):
   try:
       shutil.rmtree(folder_path_to_delete)
@@ -141,6 +99,7 @@ import RemapColorTool
 import ErdasConvert
 import RemapTable
 import ColorTable
+import MosaicL89S2
 
 from AutomatedL89Mapping import L89MosaicClassification
 from AutomatedS2Mapping import S2MosaicClassification
@@ -166,8 +125,9 @@ L89tileFolder = 'AutoInseasonL89_MappingTest'
 S2tileFolder = 'AutoInseasonS2_MappingTest'
 local_root_folder = '../DownloadClassifications'
 mosaicfolder_path = '../DownloadClassifications/AutoInseasonL89S2_Mosaic'
-l89_name = "_L89mosaic.tif"
-s2_name = "_S2mosaic.tif"
+l89_name = month + "_L89mosaic.tif"
+s2_name = month + "_S2mosaic.tif"
+mosaic_name = month + "_L89_S2_merged.tif"
 # folderPath = root_path + mosaicFolder # '/content/drive/MyDrive/' could be set to any root direction
 
 CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
@@ -195,7 +155,7 @@ if __name__ == '__main__':
     print("Both L89 and S2 classification processes completed.")
     try:
         # output mosaiced image to folderPath+f'/{month}_L89_S2_merged.tif'
-        mosaic_L89_S2_gdal(mosaicfolder_path, month, l89_name, s2_name)
+        MosaicL89S2.mosaic_L89_S2_gdal(mosaicfolder_path, l89_name, s2_name, mosaic_name)
         # Use shutil.rmtree() to delete the folder and its contents
         # l89folder_path_to_delete = root_path + L89tileFolder
         # s2folder_path_to_delete = root_path + S2tileFolder
@@ -206,7 +166,7 @@ if __name__ == '__main__':
 
     # ========== CONFIGURATION ==========
 
-    mosaicedFilePath = mosaicfolder_path + f'/{month}_L89_S2_merged.tif'
+    mosaicedFilePath = mosaicfolder_path + '/' + mosaic_name
     outcolor_tif = mosaicfolder_path + f'/{month}_L89_S2_remapcolor.tif'
     output_erdas_path = mosaicfolder_path + f'/{month}_L89_S2_erdas.img'
 
