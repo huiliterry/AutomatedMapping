@@ -9,6 +9,7 @@ import io
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
+import DownloadTool
 
 # Trusted Pixels
 
@@ -312,8 +313,8 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
   wait_for_tasks(taskList)
 """
   # download all classified images when finishing upload  
-  # time.sleep(30) # Wait for 30 seconds before checking again
-  downloadfiles_byserviceaccout(tileFolder, local_root_folder)
+  # time.sleep(30) # Wait for 30 seconds before checking again 
+  DownloadTool.downloadfiles_byserviceaccout(tileFolder, local_root_folder)
 
   # mosaic all classified images when finishing download
   # time.sleep(30) # Wait for 30 seconds before checking again
