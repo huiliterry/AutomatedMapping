@@ -38,44 +38,6 @@ def mosaic_L89_S2_gdal(output_path,month):
   print("Mosaic saved to:", mosaic_output)
 
 # %% [markdown]
-# Processing - Erdas IMAGE convert
-
-# %%
-def convert_tiff_to_erdas(input_tiff_path, output_erdas_path):
-    """
-    Converts a TIFF image to ERDAS Imagine (.img) format.
-
-    Args:
-        input_tiff_path (str): Path to the input TIFF file.
-        output_erdas_path (str): Path for the output ERDAS Imagine file.
-    """
-    try:
-        # Open the input TIFF dataset
-        src_ds = gdal.Open(input_tiff_path)
-        if src_ds is None:
-            print(f"Error: Could not open input TIFF file: {input_tiff_path}")
-            return
-
-        # Get the ERDAS Imagine driver
-        driver = gdal.GetDriverByName('HFA') # 'HFA' is the driver for ERDAS Imagine (.img)
-        if driver is None:
-            print("Error: HFA (ERDAS Imagine) driver not found.")
-            return
-
-        # Create the output dataset in ERDAS Imagine format
-        # The CreateCopy method handles copying all georeferencing and band information
-        dst_ds = driver.CreateCopy(output_erdas_path, src_ds, 0, options=["COMPRESSED=YES"])
-
-        # Close the datasets to release resources
-        src_ds = None
-        dst_ds = None
-
-        print(f"Conversion successful: {input_tiff_path} converted to {output_erdas_path}")
-
-    except Exception as e:
-        print(f"An error occurred during conversion: {e}")
-
-# %% [markdown]
 # Delete specific folder
 
 # %%
@@ -564,6 +526,10 @@ import numpy as np
 from multiprocessing import Process
 import TrustedPixel
 import RemapColorTool
+import ErdasConvert
+
+from AutomatedL89Mapping import L89MosaicClassification
+from AutomatedS2Mapping import S2MosaicClassification
 
 # Path to your downloaded JSON key
 SERVICE_ACCOUNT = 'automatedmapping@ee-huil7073.iam.gserviceaccount.com'
@@ -573,8 +539,6 @@ credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT, KEY_FILE)
 ee.Initialize(credentials)
 
 
-from AutomatedL89Mapping import L89MosaicClassification
-from AutomatedS2Mapping import S2MosaicClassification
 
 year = 2025
 startDate = str(year) + "-05-01"
@@ -639,7 +603,7 @@ if __name__ == '__main__':
 
     # Color table
     color_table = color_table_Arc()
-
+    
     # ========== RUN ==========
     try:
         # output color image to folderPath+f'/{month}_L89_S2_remapcolor.tif'
@@ -649,7 +613,7 @@ if __name__ == '__main__':
 
     try:
         # output Erdas image to folderPath+f'/{month}_L89_S2_erdas.tif'
-        convert_tiff_to_erdas(outcolor_tif, output_erdas_path)
+        ErdasConvert.convert_tiff_to_erdas(outcolor_tif, output_erdas_path)
     except Exception as e:
         print(f"Post-processing failed: {e}")
 
