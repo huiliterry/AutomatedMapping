@@ -5,9 +5,9 @@
 # Processing - Mosaic L89 and S2 (S2 cover L89)
 
 # %%
-def mosaic_L89_S2_gdal(output_path,month):
-  l89_path = os.path.join(output_path, f"{month}_L89mosaic.tif")
-  s2_path = os.path.join(output_path, f"{month}_S2mosaic.tif")
+def mosaic_L89_S2_gdal(output_path,month,L89name, S2name):
+  l89_path = os.path.join(output_path, month + L89name)
+  s2_path = os.path.join(output_path, month + S2name)
   if not os.path.exists(l89_path) or not os.path.exists(s2_path):
     raise FileNotFoundError("One or both classification TIFFs are missing. Mosaic step aborted.")
 
@@ -166,6 +166,8 @@ L89tileFolder = 'AutoInseasonL89_MappingTest'
 S2tileFolder = 'AutoInseasonS2_MappingTest'
 local_root_folder = '../DownloadClassifications'
 mosaicfolder_path = '../DownloadClassifications/AutoInseasonL89S2_Mosaic'
+l89_name = "_L89mosaic.tif"
+s2_name = "_S2mosaic.tif"
 # folderPath = root_path + mosaicFolder # '/content/drive/MyDrive/' could be set to any root direction
 
 CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
@@ -174,11 +176,11 @@ CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
 # mosaic_remap_collor_conver(startDate,endDate,month,L89cloudCover,S2cloudCover,CONUSBoundary,CONUStrainingLabel, L89tileFolder,S2tileFolder,local_root_folder,mosaicfolder_path)
 def run_landsat():
     # image title: month+"_L89mosaic_output.tif"
-    L89MosaicClassification(startDate, endDate, month, S2cloudCover, CONUSBoundary, CONUStrainingLabel, L89tileFolder, local_root_folder, mosaicfolder_path)
+    L89MosaicClassification(startDate, endDate, month, S2cloudCover, CONUSBoundary, CONUStrainingLabel, L89tileFolder, local_root_folder, mosaicfolder_path,l89_name)
 
 def run_sentinel():
     # image title: month+"_S2mosaic_output.tif"
-    S2MosaicClassification(startDate, endDate, month, L89cloudCover, CONUSBoundary, CONUStrainingLabel, S2tileFolder, local_root_folder, mosaicfolder_path)
+    S2MosaicClassification(startDate, endDate, month, L89cloudCover, CONUSBoundary, CONUStrainingLabel, S2tileFolder, local_root_folder, mosaicfolder_path,s2_name)
 
 if __name__ == '__main__':
     p1 = Process(target=run_landsat)
@@ -193,7 +195,7 @@ if __name__ == '__main__':
     print("Both L89 and S2 classification processes completed.")
     try:
         # output mosaiced image to folderPath+f'/{month}_L89_S2_merged.tif'
-        mosaic_L89_S2_gdal(mosaicfolder_path, month)
+        mosaic_L89_S2_gdal(mosaicfolder_path, month, l89_name, s2_name)
         # Use shutil.rmtree() to delete the folder and its contents
         # l89folder_path_to_delete = root_path + L89tileFolder
         # s2folder_path_to_delete = root_path + S2tileFolder

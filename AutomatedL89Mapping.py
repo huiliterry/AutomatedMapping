@@ -9,6 +9,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import DownloadTool
+import MosaicMultiImg
 
 # Trusted Pixels
 
@@ -159,7 +160,7 @@ def L89List(CONUSBoundary):
 # Function - L89 mosaic
 
 # %%
-def mosaicL89outputVRT(inputfolder_path,outputfolder_path,month):
+def mosaicL89outputVRT(inputfolder_path,outputfolder_path,month,file_name):
     # Build full folder path
     # inputfolder_path = os.path.join('/content/drive/MyDrive', inputfolder)
     # print(f"Input folder path: {inputfolder_path}")
@@ -183,7 +184,7 @@ def mosaicL89outputVRT(inputfolder_path,outputfolder_path,month):
     # Define output mosaic path
     # outputfolder_path = os.path.join('/content/drive/MyDrive', outputfolder)
     os.makedirs(outputfolder_path, exist_ok=True)
-    out_fp = os.path.join(outputfolder_path, month+"_L89mosaic.tif")
+    out_fp = os.path.join(outputfolder_path, month+file_name)
 
     # Translate VRT to compressed GeoTIFF using tiling and LZW compression
     translate_options = gdal.TranslateOptions(
@@ -205,7 +206,7 @@ def mosaicL89outputVRT(inputfolder_path,outputfolder_path,month):
 # Function - L89 mosaic mapping
 
 # %%
-def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder):
+def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
   """""
   # Filter the L89 harmonized collection by date and bounds.
   pathrowlist = L89List(CONUSBoundary)
@@ -262,7 +263,7 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   # time.sleep(30) # Wait for 30 seconds before checking again
   print("Ready to mosaic")
   sourceFolder = os.path.join(local_root_folder, tileFolder)
-  mosaicL89outputVRT(sourceFolder, mosaicFolder, month)
+  MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, month, file_name)
 
 # %% [markdown]
 # Application - L89 mapping
