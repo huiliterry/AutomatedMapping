@@ -238,7 +238,6 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
         print('local_file_path',local_file_path)
 
         # Search for all files in this Drive folder
-        query = f"'{folder_id}' in parents and trashed = false"
         filesList = list_all_files_in_folder(drive_service, folder_id)
         print('filesList',len(filesList))
         if len(filesList) == 0:

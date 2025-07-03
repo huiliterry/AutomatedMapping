@@ -32,10 +32,7 @@ def list_all_files_in_folder(service, folder_id):
 
     return files
 
-# %% [markdown]
-# Access Drive files and download to local folders
 
-# %%
 # create service account key in Google Cloud, download key .json, share downloadable folders to created service account
 def downloadfiles_byserviceaccout(target_name, local_folder):
     # Load your service account key
@@ -63,9 +60,10 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
         print('local_file_path',local_file_path)
 
         # Search for all files in this Drive folder
-        query = f"'{folder_id}' in parents and trashed = false"
         filesList = list_all_files_in_folder(drive_service, folder_id)
         print('filesList',len(filesList))
+        if len(filesList) == 0:
+             break
 
         for i, file_obj in enumerate(filesList):
                 file_title = file_obj['name']
@@ -82,7 +80,6 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
                     print(f"Download {int(status.progress() * 100)}%.")
 
         print(f"All files downloaded to: {local_file_path}")
-    # return allfolder_name
 # %%
 # Trigger the authentication flow.
 # ee.Authenticate()
