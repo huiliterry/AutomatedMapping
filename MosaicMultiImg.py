@@ -3,7 +3,7 @@ import os
 from osgeo import gdal
 
 # Function - S2 mosaic
-def mosaicoutputVRT(inputfolder_path,outputfolder_path,month,file_name):
+def mosaicoutputVRT(inputfolder_path,outputfolder_path,file_name):
     # Build full folder path
     # inputfolder_path = os.path.join('/content/drive/MyDrive', inputfolder)
     # print(f"Input folder path: {inputfolder_path}")
@@ -27,7 +27,7 @@ def mosaicoutputVRT(inputfolder_path,outputfolder_path,month,file_name):
     # Define output mosaic path
     # outputfolder_path = os.path.join('/content/drive/MyDrive', outputfolder)
     os.makedirs(outputfolder_path, exist_ok=True)
-    out_fp = os.path.join(outputfolder_path, month + file_name)
+    out_fp = os.path.join(outputfolder_path, file_name)
 
     # Translate VRT to compressed GeoTIFF using tiling and LZW compression
     translate_options = gdal.TranslateOptions(

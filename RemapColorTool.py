@@ -33,6 +33,17 @@ def remap_and_color_large_raster(input_path, output_path, remap_dict, color_tabl
     nodata_val = 255  # Must be within 0–255 for GDT_Byte
     out_band.SetNoDataValue(nodata_val)
 
+    # Apply color table
+    ct = gdal.ColorTable()
+    for val, rgb in color_table_dict.items():
+      if val != 0:  # 0 is now NoData
+        ct.SetColorEntry(val, (*rgb, 255))
+    ct.SetColorEntry(nodata_val, (255, 255, 255, 0))  # Transparent for NoData
+    
+    out_band.SetRasterColorTable(ct)
+    out_band.SetRasterColorInterpretation(gdal.GCI_PaletteIndex)
+
+
     print(f"Processing in blocks: {block_xsize} x {block_ysize}")
     for y in range(0, ysize, block_ysize):
         rows = min(block_ysize, ysize - y)
@@ -55,16 +66,9 @@ def remap_and_color_large_raster(input_path, output_path, remap_dict, color_tabl
 
     out_band.FlushCache()
 
-    # Apply color table
-    ct = gdal.ColorTable()
-    for val, rgb in color_table_dict.items():
-      if val != 0:  # 0 is now NoData
-        ct.SetColorEntry(val, (*rgb, 255))
-    ct.SetColorEntry(nodata_val, (255, 255, 255, 0))  # Transparent for NoData
-    out_band.SetColorTable(ct)
-    out_band.SetRasterColorInterpretation(gdal.GCI_PaletteIndex)
 
     # Cleanup
     src_ds = None
     out_ds = None
+    out_band = None
     print(f"Remap and color table assignment complete and saved to: {output_path}")

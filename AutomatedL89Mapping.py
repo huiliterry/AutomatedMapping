@@ -263,7 +263,7 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   # time.sleep(30) # Wait for 30 seconds before checking again
   print("Ready to mosaic")
   sourceFolder = os.path.join(local_root_folder, tileFolder)
-  MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, month, file_name)
+  MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
 
 # %% [markdown]
 # Application - L89 mapping

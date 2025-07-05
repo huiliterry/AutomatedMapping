@@ -6,6 +6,7 @@ from osgeo import gdal
 def mosaic_L89_S2_gdal(output_path,L89name,S2name,mosaic_name):
   l89_path = os.path.join(output_path, L89name)
   s2_path = os.path.join(output_path, S2name)
+  # print("l89s2 mosaiced images",l89_path,l89_path)
   if not os.path.exists(l89_path) or not os.path.exists(s2_path):
     raise FileNotFoundError("One or both classification TIFFs are missing. Mosaic step aborted.")
 
