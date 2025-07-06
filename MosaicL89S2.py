@@ -1,9 +1,12 @@
 # %% mosaic L89 and S2 mosaiced images
 import os
+import ee
+import json
 from osgeo import gdal
 
 
-def mosaic_L89_S2_gdal(output_path,L89name,S2name,mosaic_name):
+
+def mosaic_L89_S2_gdal(output_path,L89name,S2name,mosaic_name,clip_output):
   l89_path = os.path.join(output_path, L89name)
   s2_path = os.path.join(output_path, S2name)
   # print("l89s2 mosaiced images",l89_path,l89_path)
@@ -34,4 +37,16 @@ def mosaic_L89_S2_gdal(output_path,L89name,S2name,mosaic_name):
   # 3. Cleanup
   os.remove(vrt_path)
 
+  # 4. Clip by CONUS boundary
+  # shp_path  = "../ShapeFile/CONUS_boundary_5070.shp"
+  # # Clip raster using the shapefile boundary
+  # gdal.Warp(
+  #     destNameOrDestDS=clip_output,
+  #     srcDSOrSrcDSTab=mosaic_output,
+  #     cutlineDSName=shp_path,
+  #     cropToCutline=True,
+  #     dstNodata=0,  # or 255 or any value that makes sense
+  #     multithread=True,
+  #     options=["COMPRESS=LZW", "TILED=YES", "BIGTIFF=YES","SPARSE_OK=YES"]
+  # )
   print("Mosaic saved to:", mosaic_output)
