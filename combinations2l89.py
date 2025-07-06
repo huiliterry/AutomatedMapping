@@ -9,20 +9,6 @@ def delete_folder(folder_path_to_delete):
       print(f"Error deleting folder {folder_path_to_delete}: {e}")
 
 # %%
-# # Define a geometry to cover Conterminous U.S.
-# CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
-#                     .filter(ee.Filter.neq('NAME', 'United States Virgin Islands'))
-#                     .filter(ee.Filter.neq('NAME', 'Puerto Rico'))
-#                     .filter(ee.Filter.neq('NAME', 'Alaska'))
-#                     .filter(ee.Filter.neq('NAME', 'Hawaii'))
-#                     .filter(ee.Filter.neq('NAME', 'Guam'))
-#                     .filter(ee.Filter.neq('NAME', 'Virgin Islands'))
-#                     .filter(ee.Filter.neq('NAME', 'American Samoa'))
-#                     .filter(ee.Filter.neq('NAME', 'Northern Mariana Islands'))
-#                     .filter(ee.Filter.neq('NAME', 'Commonwealth of the Northern Mariana Islands'))).union().geometry()
-
-
-# %%
 # def mosaic_remap_collor_conver(startDate,endDate,month,L89cloudCover,S2cloudCover,CONUSBoundary,CONUStrainingLabel, L89tileFolder,S2tileFolder,local_root_folder,mosaicfolder_path):
 #     def run_landsat():
 #         # image title: month+"_L89mosaic_output.tif"
@@ -129,10 +115,23 @@ mosaicfolder_path = '../DownloadClassifications/AutoInseasonL89S2_Mosaic'
 l89_name = month + "_L89mosaic.tif"
 s2_name = month + "_S2mosaic.tif"
 mosaic_name = month + "_L89_S2_merged.tif"
+clip_name = month + "_L89_S2_clip.tif"
 # folderPath = root_path + mosaicFolder # '/content/drive/MyDrive/' could be set to any root direction
 
+# # Define a geometry to cover Conterminous U.S.
 CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
-                    .filter(ee.Filter.eq('NAME', 'Nebraska'))).geometry()
+                    .filter(ee.Filter.neq('NAME', 'United States Virgin Islands'))
+                    .filter(ee.Filter.neq('NAME', 'Puerto Rico'))
+                    .filter(ee.Filter.neq('NAME', 'Alaska'))
+                    .filter(ee.Filter.neq('NAME', 'Hawaii'))
+                    .filter(ee.Filter.neq('NAME', 'Guam'))
+                    .filter(ee.Filter.neq('NAME', 'Virgin Islands'))
+                    .filter(ee.Filter.neq('NAME', 'American Samoa'))
+                    .filter(ee.Filter.neq('NAME', 'Northern Mariana Islands'))
+                    .filter(ee.Filter.neq('NAME', 'Commonwealth of the Northern Mariana Islands'))).union().geometry()
+# print('CONUSBoundary.type()',CONUSBoundary.type().getInfo())
+# CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
+#                     .filter(ee.Filter.eq('NAME', 'Nebraska'))).geometry()
 
 # mosaic_remap_collor_conver(startDate,endDate,month,L89cloudCover,S2cloudCover,CONUSBoundary,CONUStrainingLabel, L89tileFolder,S2tileFolder,local_root_folder,mosaicfolder_path)
 def run_landsat():
@@ -156,7 +155,7 @@ if __name__ == '__main__':
     print("Both L89 and S2 classification processes completed.")
     try:
         # output mosaiced image to folderPath+f'/{month}_L89_S2_merged.tif'
-        MosaicL89S2.mosaic_L89_S2_gdal(mosaicfolder_path, l89_name, s2_name, mosaic_name)
+        MosaicL89S2.mosaic_L89_S2_gdal(mosaicfolder_path, l89_name, s2_name, mosaic_name, clip_name)
         # Use shutil.rmtree() to delete the folder and its contents
         # l89folder_path_to_delete = root_path + L89tileFolder
         # s2folder_path_to_delete = root_path + S2tileFolder
@@ -167,7 +166,7 @@ if __name__ == '__main__':
 
     # ========== CONFIGURATION ==========
 
-    mosaicedFilePath = mosaicfolder_path + '/' + mosaic_name
+    mosaicedFilePath = mosaicfolder_path + '/' + clip_name
     outcolor_tif = mosaicfolder_path + f'/{month}_L89_S2_remapcolor.tif'
     output_erdas_path = mosaicfolder_path + f'/{month}_L89_S2_erdas.img'
 
