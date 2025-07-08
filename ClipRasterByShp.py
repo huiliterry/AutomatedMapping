@@ -21,7 +21,7 @@ def clip_block(src_path, dst_path, window, geom_shapes, nodata_val):
         with rasterio.open(dst_path, "r+") as dst:
             dst.write(block_data, 1, window=window)
 
-def parallel_clip_raster(input_raster, clip_geojson, output_raster, nodata_val=0, max_workers=8,block_size=1024):
+def parallel_clip_raster(input_raster, clip_geojson, output_raster, nodata_val=0, max_workers=8,block_size=2048):
     print("📍 Loading clipping geometry...")
     gdf = gpd.read_file(clip_geojson)
     geom_shapes = [shape(geom) for geom in gdf.geometry]
