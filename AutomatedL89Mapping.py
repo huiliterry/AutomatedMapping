@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import DownloadTool
 import MosaicMultiImg
-import RemapTable_singleImage
+import RemapPixelTable
 
 # Trusted Pixels
 
@@ -136,11 +136,7 @@ def imgL89Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel):
 
   return ee.Algorithms.If(ee.Number(tileGeometry.area(1)).neq(0),imgClassified(),imgNull())
 
-
-# %% [markdown]
 # Function - L89 tile list
-
-# %%
 def L89List(CONUSBoundary):
   # Filter the L89 harmonized collection by date and bounds.
   L8 = (ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
@@ -157,56 +153,7 @@ def L89List(CONUSBoundary):
   L89_pathrowlist = ee.Array.cat([pathString, rowString], 1).toList().distinct().getInfo()
   return L89_pathrowlist
 
-# %% [markdown]
-# Function - L89 mosaic
-
-# %%
-def mosaicL89outputVRT(inputfolder_path,outputfolder_path,month,file_name):
-    # Build full folder path
-    # inputfolder_path = os.path.join('/content/drive/MyDrive', inputfolder)
-    # print(f"Input folder path: {inputfolder_path}")
-    # Find all .tif files in the folder
-    tif_files = glob.glob(os.path.join(inputfolder_path, '*.tif'))
-    print(f"Found {len(tif_files)} files for mosaicking.")
-
-    if not tif_files:
-        print("No .tif files found.")
-        return
-
-    # Create temporary VRT (Virtual Raster Tile)
-    vrt_path = os.path.join(inputfolder_path, "temp_mosaic.vrt")
-    vrt_options = gdal.BuildVRTOptions(srcNodata=0, VRTNodata=0)
-    vrt = gdal.BuildVRT(vrt_path, tif_files, options=vrt_options)
-    if vrt is None:
-        print("VRT build failed.")
-        return
-    vrt = None  # Close the VRT handle
-
-    # Define output mosaic path
-    # outputfolder_path = os.path.join('/content/drive/MyDrive', outputfolder)
-    os.makedirs(outputfolder_path, exist_ok=True)
-    out_fp = os.path.join(outputfolder_path, month+file_name)
-
-    # Translate VRT to compressed GeoTIFF using tiling and LZW compression
-    translate_options = gdal.TranslateOptions(
-        format='GTiff',
-        creationOptions=[
-            'TILED=YES',
-            'COMPRESS=LZW',
-            'BIGTIFF=YES',  # Use for large outputs
-            'NUM_THREADS=ALL_CPUS'
-        ]
-    )
-    gdal.Translate(out_fp, vrt_path, options=translate_options)
-    print(f"Mosaic written to: {out_fp}")
-
-    # Optional: remove temporary VRT
-    os.remove(vrt_path)
-
-# %% [markdown]
 # Function - L89 mosaic mapping
-
-# %%
 def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
   """""
   # Filter the L89 harmonized collection by date and bounds.
@@ -215,8 +162,8 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   print('Number of L89 tiles:',numList)
 
   taskList = []
-  remap_original = RemapTable_singleImage.orginal_value()
-  remap_target = RemapTable_singleImage.target_value()
+  remap_original = RemapPixelTable.originalValueList()
+  remap_target = RemapPixelTable.resetValueList()
 
   # classification for each single tile
 #   for i in range(numList):
@@ -268,45 +215,3 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   print("Ready to mosaic")
   sourceFolder = os.path.join(local_root_folder, tileFolder)
   MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
-
-# %% [markdown]
-# Application - L89 mapping
-
-# %%
-# import os
-# import glob
-# import time
-# from osgeo import gdal
-# import ee
-# import io
-# from google.oauth2 import service_account
-# from googleapiclient.discovery import build
-# from googleapiclient.http import MediaIoBaseDownload
-
-# # Path to your downloaded JSON key
-# SERVICE_ACCOUNT = 'automatedmapping@ee-huil7073.iam.gserviceaccount.com'
-# KEY_FILE = 'ee-huil7073-81b7212a3bd2.json'
-
-# credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT, KEY_FILE)
-# ee.Initialize(credentials)
-
-# CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
-#                     .filter(ee.Filter.eq('NAME', 'Nebraska'))).geometry()
-
-# CONUStrainingLabel = trustedPixels(2025,7)
-
-# startDate = "2025-05-01"
-# endDate = "2025-07-01"
-# month = "June"
-# cloudCover = 20
-
-
-# # root_path = '/content/drive/MyDrive/'
-# L89tileFolder = 'AutoInseasonL89_MappingTest'
-# S2tileFolder = 'AutoInseasonS2_MappingTest'
-# local_root_folder = '../DownloadClassifications'
-# mosaicfolder_path = '../DownloadClassifications/AutoInseasonL89S2_Mosaic'
-
-# L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, L89tileFolder, local_root_folder, mosaicfolder_path)
-
-

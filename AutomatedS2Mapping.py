@@ -11,7 +11,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import DownloadTool
 import MosaicMultiImg
-import RemapTable_singleImage
+import RemapPixelTable
 
 
 # %%
@@ -132,9 +132,6 @@ def stateS2List(CONUSBoundary):
                               .getInfo())
   return S2_tilelist
 
-# %% [markdown]
-# Function - S2 mosaic mapping
-
 # %%
 def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
   """""
@@ -144,8 +141,8 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
   print('Number of S2 tiles:',numList)
 
   taskList = []
-  remap_original = RemapTable_singleImage.orginal_value()
-  remap_target = RemapTable_singleImage.target_value()
+  remap_original = RemapPixelTable.originalValueList()
+  remap_target = RemapPixelTable.resetValueList()
 
   # classification for each single tile
   # for i in range(935,numList):
