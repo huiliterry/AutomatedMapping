@@ -11,6 +11,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import DownloadTool
 import MosaicMultiImg
+import RemapTable_singleImage
 
 
 # %%
@@ -143,6 +144,8 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
   print('Number of S2 tiles:',numList)
 
   taskList = []
+  remap_original = RemapTable_singleImage.orginal_value()
+  remap_target = RemapTable_singleImage.target_value()
 
   # classification for each single tile
   # for i in range(935,numList):
@@ -154,7 +157,8 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
     imgID =classified_dictionary.get('description').getInfo()
     # print('ifnull',ifnull)
     if imgID != 'null':
-      classified =ee.Image(classified_dictionary.get('image'))
+      # classified image was remapped as new pixel values and clipped by CONUS boundary
+      classified =ee.Image(classified_dictionary.get('image')).remap(remap_original,remap_target).clip(CONUSBoundary)
       refion = ee.Geometry(classified_dictionary.get('region'))
       description = month+'_'+classified_dictionary.get('description').getInfo()
 

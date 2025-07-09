@@ -10,6 +10,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import DownloadTool
 import MosaicMultiImg
+import RemapTable_singleImage
 
 # Trusted Pixels
 
@@ -214,6 +215,8 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   print('Number of L89 tiles:',numList)
 
   taskList = []
+  remap_original = RemapTable_singleImage.orginal_value()
+  remap_target = RemapTable_singleImage.target_value()
 
   # classification for each single tile
 #   for i in range(numList):
@@ -225,15 +228,16 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
     imgID =classified_dictionary.get('description').getInfo()
     print('imgID',imgID)
     if imgID != 'null':
-      classified =ee.Image(classified_dictionary.get('image'))
-      refion = ee.Geometry(classified_dictionary.get('region'))
+      # classified image was remapped as new pixel values and clipped by CONUS boundary
+      classified =ee.Image(classified_dictionary.get('image')).remap(remap_original,remap_target).clip(CONUSBoundary)
+      g = ee.Geometry(classified_dictionary.get('region'))
       description = month + '_' + classified_dictionary.get('description').getInfo()
 
       task = ee.batch.Export.image.toDrive(
           image = classified,
           description = description,
           folder = tileFolder,
-          region = refion, # Ensure region is a list of coordinates
+          region = region, # Ensure region is a list of coordinates
           scale = 10, # Resolution of your output image
           crs = 'EPSG:5070', # Coordinate Reference System
           maxPixels = 1e12 # Increase if you encounter "Too many pixels" error
