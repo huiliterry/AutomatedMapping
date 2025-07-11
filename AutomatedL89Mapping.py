@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import DownloadTool
 import MosaicMultiImg
-import RemapPixelTable
+import RemapTable
 
 # Trusted Pixels
 
@@ -155,15 +155,15 @@ def L89List(CONUSBoundary):
 
 # Function - L89 mosaic mapping
 def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
-  """""
+  
   # Filter the L89 harmonized collection by date and bounds.
   pathrowlist = L89List(CONUSBoundary)
   numList = len(pathrowlist)
   print('Number of L89 tiles:',numList)
 
   taskList = []
-  remap_original = RemapPixelTable.originalValueList()
-  remap_target = RemapPixelTable.resetValueList()
+  remap_original = RemapTable.originalValueList()
+  remap_target = RemapTable.resetValueList()
 
   # classification for each single tile
 #   for i in range(numList):
@@ -176,15 +176,15 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
     print('imgID',imgID)
     if imgID != 'null':
       # classified image was remapped as new pixel values and clipped by CONUS boundary
-      classified =ee.Image(classified_dictionary.get('image')).remap(remap_original,remap_target).clip(CONUSBoundary)
-      g = ee.Geometry(classified_dictionary.get('region'))
+      classified =ee.Image(classified_dictionary.get('image'))
+      refion = ee.Geometry(classified_dictionary.get('region'))
       description = month + '_' + classified_dictionary.get('description').getInfo()
 
       task = ee.batch.Export.image.toDrive(
           image = classified,
           description = description,
           folder = tileFolder,
-          region = region, # Ensure region is a list of coordinates
+          region = refion, # Ensure region is a list of coordinates
           scale = 10, # Resolution of your output image
           crs = 'EPSG:5070', # Coordinate Reference System
           maxPixels = 1e12 # Increase if you encounter "Too many pixels" error
@@ -205,7 +205,7 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
 
   # Call the monitoring function
   wait_for_tasks(taskList)
-"""
+
   # download all classified images when finishing upload  
   # time.sleep(30) # Wait for 30 seconds before checking again
   DownloadTool.downloadfiles_byserviceaccout(tileFolder, local_root_folder)

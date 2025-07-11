@@ -60,14 +60,6 @@ def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
     except Exception as e:
         print(f"Error clipping raster to COG: {e}")
 
-input_tif = "../DownloadClassifications/AutoInseasonL89S2_Mosaic/June_L89_S2_merged.tif"
-shapefile = "../ShapeFile/CONUS_boundary_5070.shp"
-jsonfile = "../ShapeFile/CONUS_Boundary_5070_simplify.json"
-outclip_tif = "../DownloadClassifications/AutoInseasonL89S2_Mosaic/June_L89_S2_clipwarp.tif"
-vrt_path = "../DownloadClassifications/AutoInseasonL89S2_Mosaic/temp.vrt"
-nodata_val = 0
-
-clip_raster_to_cog(input_tif, shapefile, outclip_tif)
 
 
 

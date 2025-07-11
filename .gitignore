@@ -1,4 +1,4 @@
 *.json 
 *.txt 
 *.xlsx
-.code-workspace
+*.code-workspace

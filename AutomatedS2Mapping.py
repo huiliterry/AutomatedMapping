@@ -1,5 +1,3 @@
-# %% [markdown]
-
 import os
 import glob
 import time
@@ -11,7 +9,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 import DownloadTool
 import MosaicMultiImg
-import RemapPixelTable
+import RemapTable
 
 
 # %%
@@ -134,15 +132,15 @@ def stateS2List(CONUSBoundary):
 
 # %%
 def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
-  """""
+  
   # Filter the S2 harmonized collection by date and bounds.
   S2_tilelist = stateS2List(CONUSBoundary)
   numList = len(S2_tilelist)
   print('Number of S2 tiles:',numList)
 
   taskList = []
-  remap_original = RemapPixelTable.originalValueList()
-  remap_target = RemapPixelTable.resetValueList()
+  remap_original = RemapTable.originalValueList()
+  remap_target = RemapTable.resetValueList()
 
   # classification for each single tile
   # for i in range(935,numList):
@@ -155,7 +153,7 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
     # print('ifnull',ifnull)
     if imgID != 'null':
       # classified image was remapped as new pixel values and clipped by CONUS boundary
-      classified =ee.Image(classified_dictionary.get('image')).remap(remap_original,remap_target).clip(CONUSBoundary)
+      classified =ee.Image(classified_dictionary.get('image'))
       refion = ee.Geometry(classified_dictionary.get('region'))
       description = month+'_'+classified_dictionary.get('description').getInfo()
 
@@ -184,7 +182,7 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
 
   # Call the monitoring function
   wait_for_tasks(taskList)
-"""
+
   # download all classified images when finishing upload  
   # time.sleep(30) # Wait for 30 seconds before checking again 
   DownloadTool.downloadfiles_byserviceaccout(tileFolder, local_root_folder)
@@ -194,58 +192,3 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
   print("Ready to mosaic")
   sourceFolder = os.path.join(local_root_folder, tileFolder)
   MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
-
-# %% [markdown]
-# Application - S2 mapping
-
-# %%
-# Define a geometry to cover Conterminous U.S.
-# CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
-#                     .filter(ee.Filter.neq('NAME', 'United States Virgin Islands'))
-#                     .filter(ee.Filter.neq('NAME', 'Puerto Rico'))
-#                     .filter(ee.Filter.neq('NAME', 'Alaska'))
-#                     .filter(ee.Filter.neq('NAME', 'Hawaii'))
-#                     .filter(ee.Filter.neq('NAME', 'Guam'))
-#                     .filter(ee.Filter.neq('NAME', 'Virgin Islands'))
-#                     .filter(ee.Filter.neq('NAME', 'American Samoa'))
-#                     .filter(ee.Filter.neq('NAME', 'Northern Mariana Islands'))
-#                     .filter(ee.Filter.neq('NAME', 'Commonwealth of the Northern Mariana Islands'))).union().geometry()
-
-
-# %%
-# import os
-# import glob
-# import time
-# from osgeo import gdal
-# import ee
-# import io
-# from google.oauth2 import service_account
-# from googleapiclient.discovery import build
-# from googleapiclient.http import MediaIoBaseDownload
-
-# # Path to your downloaded JSON key
-# SERVICE_ACCOUNT = 'automatedmapping@ee-huil7073.iam.gserviceaccount.com'
-# KEY_FILE = 'ee-huil7073-81b7212a3bd2.json'
-
-# credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT, KEY_FILE)
-# ee.Initialize(credentials)
-
-# CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
-#                     .filter(ee.Filter.eq('NAME', 'Nebraska'))).geometry()
-
-# CONUStrainingLabel = trustedPixels(2025,7)
-
-# startDate = "2025-05-01"
-# endDate = "2025-07-01"
-# month = "June"
-# cloudCover = 20
-
-
-# # root_path = '/content/drive/MyDrive/'
-# S2tileFolder = 'AutoInseasonS2_MappingTest'
-# local_root_folder = '../DownloadClassifications'
-# mosaicfolder_path = '../DownloadClassifications/AutoInseasonL89S2_Mosaic'
-
-# S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, S2tileFolder, local_root_folder, mosaicfolder_path)
-
-
