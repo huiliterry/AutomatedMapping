@@ -5,9 +5,6 @@ from osgeo import gdal
 # Function - S2 mosaic
 def mosaicoutputVRT(inputfolder_path,outputfolder_path,file_name):
     # Build full folder path
-    # inputfolder_path = os.path.join('/content/drive/MyDrive', inputfolder)
-    # print(f"Input folder path: {inputfolder_path}")
-    # Find all .tif files in the folder
     tif_files = glob.glob(os.path.join(inputfolder_path, '*.tif'))
     print(f"Found {len(tif_files)} files for mosaicking.")
 
@@ -25,7 +22,6 @@ def mosaicoutputVRT(inputfolder_path,outputfolder_path,file_name):
     vrt = None  # Close the VRT handle
 
     # Define output mosaic path
-    # outputfolder_path = os.path.join('/content/drive/MyDrive', outputfolder)
     os.makedirs(outputfolder_path, exist_ok=True)
     out_fp = os.path.join(outputfolder_path, file_name)
 
