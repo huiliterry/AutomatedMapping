@@ -1,74 +1,74 @@
-import rasterio
-import geopandas as gpd
-import numpy as np
-from rasterio.features import geometry_mask
-from rasterio.windows import Window
-from shapely.geometry import shape, box
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import os
+from osgeo import gdal
 
-def clip_block(src_path, dst_path, window, geom_shapes, nodata_val):
-    with rasterio.open(src_path) as src:
-        block_data = src.read(1, window=window)
-        transform = src.window_transform(window)
-        out_shape = (block_data.shape[0], block_data.shape[1])
+def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
+                       compression="LZW", nodata_value=0):
+    """
+    Clips a large raster using a shapefile and outputs a Cloud Optimized GeoTIFF (COG).
 
-        # Mask outside geometry
-        mask = geometry_mask(geom_shapes, transform=transform, invert=True, out_shape=out_shape)
-        block_data[~mask] = nodata_val
+    Args:
+        input_raster_path (str): Path to the input raster file (e.g., .tif).
+        shapefile_path (str): Path to the shapefile to use for clipping (e.g., .shp).
+        output_cog_path (str): Path to the desired output COG file.
+        compression (str, optional): Compression method for the output raster. Defaults to "LZW".
+                                     Common options: LZW, DEFLATE, JPEG, ZSTD.
+        nodata_value (int or float, optional): Value to use for pixels outside the clip area.
+                                               If None, the input raster's nodata value is used
+                                               or a default is applied if not present.
+    """
 
-        # Reopen destination in write mode (update mode is thread-safe if tiles don't overlap)
-        with rasterio.open(dst_path, "r+") as dst:
-            dst.write(block_data, 1, window=window)
+    gdal.UseExceptions()
 
-def parallel_clip_raster(input_raster, clip_geojson, output_raster, nodata_val=0, max_workers=8,block_size=2048):
-    print("📍 Loading clipping geometry...")
-    gdf = gpd.read_file(clip_geojson)
-    geom_shapes = [shape(geom) for geom in gdf.geometry]
+    # Determine nodata value if not provided
+    if nodata_value is None:
+        try:
+            with gdal.Open(input_raster_path) as ds:
+                band = ds.GetRasterBand(1)
+                nodata_value = band.GetNoDataValue()
+        except Exception:
+            print("Warning: Could not retrieve NoData value from input raster. Using default -9999.0.")
+            nodata_value = -9999.0
 
-    with rasterio.open(input_raster) as src:
-        meta = src.meta.copy()
-        meta.update({
-            "tiled": True,
-            "compress": "lzw",
-            "nodata": nodata_val
-        })
+    # Creation options for a COG
+    # These options are automatically handled by the COG driver in GDAL 3.1+
+    # but explicitly stating them can ensure the desired configuration.
+    cog_creation_options = [
+        "COMPRESS={}".format(compression),  # Use specified compression
+        "BIGTIFF=YES",                # Handle files > 4GB
+        "NUM_THREADS=ALL_CPUS",             # Use all CPU cores for processing/compression
+        "BLOCKSIZE=512"                     # Tile size (e.g., 256x256 pixels)
+    ]
+    # For some compressions like JPEG, PHOTOMETRIC=YCBCR is recommended for better results, {Link: according to the GDAL documentation https://gdal.org/en/stable/drivers/raster/gtiff.html}
+    if compression == "JPEG":
+        cog_creation_options.append("PHOTOMETRIC=YCBCR")
+        cog_creation_options.append("JPEG_QUALITY=80") # Adjust quality (0-100)
 
-        print("💾 Creating output raster...")
-        with rasterio.open(output_raster, "w", **meta) as dst:
-            # dst.write(np.full((src.count, src.height, src.width), nodata_val, dtype=src.dtypes[0]))
-            pass
+    cog_warp_options = ["OPTIMIZE_SIZE=TRUE"]
+    warp_options = gdal.WarpOptions(
+        format="COG",  # **Specify output format as COG**
+        cutlineDSName=shapefile_path,
+        cropToCutline=True,
+        dstNodata=nodata_value,
+        creationOptions=cog_creation_options,
+        warpOptions = cog_warp_options
+        # Potentially increase WarpMemoryLimit for very large files and sufficient RAM
+        # WarpMemoryLimit=512 * 1024 * 1024  # Example: 512MB
+    )
 
-        # block_width, block_height = 10240,10240 #src.block_shapes[0]
-        print("block_width,block_height", block_size)
-        windows = []
+    try:
+        gdal.Warp(output_cog_path, input_raster_path, options=warp_options)
+        print(f"Raster '{input_raster_path}' clipped and saved as COG successfully to '{output_cog_path}'.")
+    except Exception as e:
+        print(f"Error clipping raster to COG: {e}")
 
-        print("🔍 Generating processing windows...")
-        for y in range(0, src.height, block_size):
-            for x in range(0, src.width, block_size):
-                win = Window(x, y, block_size, block_size)
-                bbox = box(*rasterio.windows.bounds(win, src.transform))
-                if any(bbox.intersects(g) for g in geom_shapes):
-                    windows.append(win)
+input_tif = "../DownloadClassifications/AutoInseasonL89S2_Mosaic/June_L89_S2_merged.tif"
+shapefile = "../ShapeFile/CONUS_boundary_5070.shp"
+jsonfile = "../ShapeFile/CONUS_Boundary_5070_simplify.json"
+outclip_tif = "../DownloadClassifications/AutoInseasonL89S2_Mosaic/June_L89_S2_clipwarp.tif"
+vrt_path = "../DownloadClassifications/AutoInseasonL89S2_Mosaic/temp.vrt"
+nodata_val = 0
 
-    print(f"🚀 Launching parallel processing for {len(windows)} blocks with {max_workers} threads...")
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = [
-            executor.submit(clip_block, input_raster, output_raster, window, geom_shapes, nodata_val)
-            for window in windows
-        ]
-        for i, f in enumerate(as_completed(futures), 1):
-            print(f"🧱 Block {i}/{len(windows)} done")
-
-    print("✅ Parallel clipping complete.")
-
+clip_raster_to_cog(input_tif, shapefile, outclip_tif)
 
 
 
-# shp_path  = "../ShapeFile/CONUS_boundary_5070.shp"
-# mosaiced_name = "June_L89_S2_merged.tif"
-# cliped_name = "June_L89_S2_clip.tif"
-# raster_path = '../DownloadClassifications/AutoInseasonL89S2_Mosaic'
-# output_cliped_raster = os.path.join(raster_path, cliped_name)
-# input_cliped_raster = os.path.join(raster_path, mosaiced_name)
 
