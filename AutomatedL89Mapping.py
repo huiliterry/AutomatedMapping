@@ -1,55 +1,11 @@
-# %% [markdown]
 import os
-import glob
 import time
-from osgeo import gdal
 import ee
-import io
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
 import DownloadTool
 import MosaicMultiImg
 import RemapTable
+import DeleteDriveFiles
 
-# Trusted Pixels
-
-# %%
-# Trusted pixels extraction
-def trustedPixels(year,gap):
-
-  def getCDLbyYear(year):
-      return ee.Image('USDA/NASS/CDL/'+year).select('cropland')
-
-  gap = gap - 1
-  # year = 2025
-  oneYearList = list(range(year-gap,year))
-  # print(oneYearList)
-  twoYearList = oneYearList[0:gap:2]
-  # print(twoYearList)
-
-  oneYearListCdl = ee.ImageCollection(list(map(getCDLbyYear, list(map(str, oneYearList)))))
-  twoYearListCdl = ee.ImageCollection(list(map(getCDLbyYear, list(map(str, twoYearList)))))
-  # display(oneYearListCdl,twoYearListCdl)
-
-  # Calculate the standard deviation across the ImageCollection to find constant pixels.
-  # Create a mask where the standard deviation is zero (constant pixels).
-  oneYearconstant_mask = oneYearListCdl.reduce(ee.Reducer.stdDev()).eq(0)
-  twoYearconstant_mask = twoYearListCdl.reduce(ee.Reducer.stdDev()).eq(0)
-
-  oneYearTrusted = twoYearListCdl.first().updateMask(oneYearconstant_mask)
-  twoYearTrusted = twoYearListCdl.first().updateMask(twoYearconstant_mask)
-  # display(oneYearTrusted,twoYearTrusted)
-
-  # Merge the two trusted images
-  UStrustedpixel = ee.ImageCollection([oneYearTrusted, twoYearTrusted]).mosaic()
-
-  return UStrustedpixel
-
-# %% [markdown]
-# Function - L89 single classification
-
-# %%
 # single L89 tile classification
 def imgL89Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel):
   # single tile path and row number
@@ -153,9 +109,9 @@ def L89List(CONUSBoundary):
   L89_pathrowlist = ee.Array.cat([pathString, rowString], 1).toList().distinct().getInfo()
   return L89_pathrowlist
 
-# Function - L89 mosaic mapping
+# Function - L89 mosaic classification
 def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
-  
+ 
   # Filter the L89 harmonized collection by date and bounds.
   pathrowlist = L89List(CONUSBoundary)
   numList = len(pathrowlist)
@@ -164,7 +120,6 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   taskList = []
   remap_original = RemapTable.originalValueList()
   remap_target = RemapTable.resetValueList()
-
   # classification for each single tile
 #   for i in range(numList):
   for i in range(0,1):
@@ -176,15 +131,15 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
     print('imgID',imgID)
     if imgID != 'null':
       # classified image was remapped as new pixel values and clipped by CONUS boundary
-      classified =ee.Image(classified_dictionary.get('image'))
-      refion = ee.Geometry(classified_dictionary.get('region'))
+      classified =ee.Image(classified_dictionary.get('image')).remap(remap_original,remap_target)
+      region = ee.Geometry(classified_dictionary.get('region'))
       description = month + '_' + classified_dictionary.get('description').getInfo()
 
       task = ee.batch.Export.image.toDrive(
           image = classified,
           description = description,
           folder = tileFolder,
-          region = refion, # Ensure region is a list of coordinates
+          region = region, # Ensure region is a list of coordinates
           scale = 10, # Resolution of your output image
           crs = 'EPSG:5070', # Coordinate Reference System
           maxPixels = 1e12 # Increase if you encounter "Too many pixels" error
@@ -205,13 +160,17 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
 
   # Call the monitoring function
   wait_for_tasks(taskList)
+  print("Landsad 8/9 dataset classification done.")
 
   # download all classified images when finishing upload  
-  # time.sleep(30) # Wait for 30 seconds before checking again
+  time.sleep(30) # Wait for 30 seconds before checking again
+  print("Ready to download")
   DownloadTool.downloadfiles_byserviceaccout(tileFolder, local_root_folder)
 
+  
   # mosaic all classified images when finishing download
-  # time.sleep(30) # Wait for 30 seconds before checking again
+  time.sleep(30) # Wait for 30 seconds before checking again
   print("Ready to mosaic")
   sourceFolder = os.path.join(local_root_folder, tileFolder)
   MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
+
