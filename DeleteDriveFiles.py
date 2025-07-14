@@ -13,7 +13,7 @@ def authenticate_drive():
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
     else:
-        flow = InstalledAppFlow.from_client_secrets_file('../KEY/credentials.json', SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file('../KEY/client_secret_994737726830-8vciajorij0gqihvuorg03qknb240js3.apps.googleusercontent.com.json', SCOPES)
         creds = flow.run_local_server(port=0)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
