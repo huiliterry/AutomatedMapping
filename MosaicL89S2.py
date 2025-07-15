@@ -1,7 +1,10 @@
+# %% mosaic L89 and S2 mosaiced images
 import os
-import ee
-import json
 from osgeo import gdal
+import ColorTable
+import ColorTool
+gdal.UseExceptions()
+
 
 def mosaic_L89_S2_gdal(output_path,L89name,S2name,mosaic_name):
   l89_path = os.path.join(output_path, L89name)
@@ -23,22 +26,17 @@ def mosaic_L89_S2_gdal(output_path,L89name,S2name,mosaic_name):
   gdal.BuildVRT(vrt_path, input_files, options=vrt_options)
 
   # 2. Translate VRT to GeoTIFF using parallel write
-  # translate_options = gdal.TranslateOptions(format='GTiff', creationOptions=[
-  #     'TILED=YES',
-  #     'COMPRESS=LZW',
-  #     'BIGTIFF=YES',
-  #     'NUM_THREADS=ALL_CPUS'
-  # ])
-
-  translate_options = gdal.TranslateOptions(format='COG', creationOptions=[
-    'COMPRESS=LZW',
-    'BIGTIFF=YES',
-    'RESAMPLING=NEAREST'  # optional: specify if needed
+  translate_options = gdal.TranslateOptions(format='GTiff', creationOptions=[
+      'TILED=YES',
+      'COMPRESS=LZW',
+      'BIGTIFF=YES',
+      'NUM_THREADS=ALL_CPUS'
   ])
   gdal.Translate(mosaic_output, vrt_path, options=translate_options)
-
-  gdal.Translate(mosaic_output, vrt_path, options=translate_options)
-
+  print(f'Mosaiced raster of L89 and S2 has been saved at {mosaic_output}')
   # 3. Cleanup
   os.remove(vrt_path)
-  print("Mosaic saved to:", mosaic_output)
+
+  # 4. Color table
+  color_table = ColorTable.color_table_Arc()
+  ColorTool.add_color_table(mosaic_output,color_table)

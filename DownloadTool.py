@@ -1,15 +1,12 @@
-# %%
-import ee
 import os
 import io
+import time
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 
-# %% [markdown]
-# Access all files in a specific folder
 
-# %%
+# Access all files in a specific folder of Google Drive
 def list_all_files_in_folder(service, folder_id):
     query = f"'{folder_id}' in parents and trashed=false"
     files = []
@@ -32,7 +29,6 @@ def list_all_files_in_folder(service, folder_id):
 
     return files
 
-
 # create service account key in Google Cloud, download key .json, share downloadable folders to created service account
 def downloadfiles_byserviceaccout(target_name, local_folder):
     # Load your service account key
@@ -40,8 +36,7 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
     # SERVICE_ACCOUNT_FILE= os.path.join("..","KEY",'ee-huil7073-81b7212a3bd2.json')
     SCOPES = ['https://www.googleapis.com/auth/drive']
 
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
     drive_service = build('drive', 'v3', credentials=creds)
 
@@ -50,6 +45,7 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
     print('results',results.get('files'))
 
     # search and download each file in every folder
+    download_file_number = 0
     for f in results['files']:
         folder_name = f['name']
         folder_id = f['id']
@@ -75,19 +71,11 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
                 request = drive_service.files().get_media(fileId=file_id)
                 fh = io.FileIO(local_file_name, 'wb')
                 downloader = MediaIoBaseDownload(fh, request)
+                download_file_number += 1
                 done = False
                 while done is False:
                     status, done = downloader.next_chunk()
                     print(f"Download {int(status.progress() * 100)}%.")
+                time.sleep(1)
 
-        print(f"All files downloaded to: {local_file_path}")
-# %%
-# Trigger the authentication flow.
-# ee.Authenticate()
-# # Initialize the library.
-# ee.Initialize(project='ee-huil7073')
-
-# local_save_folder = '../DownloadClassifications'
-# downloadfiles_byserviceaccout(local_save_folder)
-
-
+        print(f"{download_file_number} files were downloaded to: {local_file_path}")

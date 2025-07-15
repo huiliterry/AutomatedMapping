@@ -32,11 +32,13 @@ def apply_color_table_as_new_cog(input_output_tif, color_table_dict, nodata_val=
     
     # Open source raster
     src_ds = gdal.Open(input_output_tif)
-    src_band = src_ds.GetRasterBand(1)
+    # src_band = src_ds.GetRasterBand(1)
     xsize = src_ds.RasterXSize
     ysize = src_ds.RasterYSize
     geotransform = src_ds.GetGeoTransform()
     projection = src_ds.GetProjection()
+
+    print("Source data type:", src_ds.GetRasterBand(1).DataType)
 
     # Create intermediate palette-based GeoTIFF
     temp_path = "temp_palette.tif"
