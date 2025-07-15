@@ -49,8 +49,8 @@ CONUStrainingLabel = TrustedPixel.trustedPixels(year,7)
 root_path = '/content/drive/MyDrive/'
 L89tileFolder = 'AutoInseasonL89_MappingTest'
 S2tileFolder = 'AutoInseasonS2_MappingTest'
-local_root_folder = '../DownloadClassifications/'
-mosaicfolder_path = '../DownloadClassifications/AutoInseasonL89S2_Result/'
+local_root_folder = '../Results/'
+mosaicfolder_path = '../Results/AutoInseasonL89S2_Result/'
 
 l89_name = month + "_L89mosaic.tif"
 s2_name = month + "_S2mosaic.tif"
