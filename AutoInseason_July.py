@@ -24,6 +24,14 @@ import time
 import DeleteDriveFiles
 import shutil
 
+# # Path to your downloaded JSON key
+# SERVICE_ACCOUNT = 'automatedmapping@ee-huil7073.iam.gserviceaccount.com'
+# KEY_FILE = '../KEY/ee-huil7073-0802b07b2350.json'
+# # KEY_FILE = os.path.join("..","KEY",'ee-huil7073-81b7212a3bd2.json')
+
+# credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT, KEY_FILE)
+# ee.Initialize(credentials)
+
 
 now = datetime.now()
 current_year = now.year
