@@ -5,6 +5,7 @@ ee.Authenticate()
 # Initialize the library.
 ee.Initialize(project='ee-huil7073')
 
+from datetime import datetime
 import os
 from osgeo import gdal
 from google.oauth2 import service_account
@@ -21,19 +22,17 @@ import ClipRasterByShp
 import ResampleTool
 import time
 import DeleteDriveFiles
+import shutil
 
-# # Path to your downloaded JSON key
-# SERVICE_ACCOUNT = 'automatedmapping@ee-huil7073.iam.gserviceaccount.com'
-# KEY_FILE = '../KEY/ee-huil7073-0802b07b2350.json'
-# # KEY_FILE = os.path.join("..","KEY",'ee-huil7073-81b7212a3bd2.json')
 
-# credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT, KEY_FILE)
-# ee.Initialize(credentials)
+now = datetime.now()
+current_year = now.year
+print("Year:", current_year)
 
-year = 2025
+year = current_year
 startDate = str(year) + "-05-01"
-endDate = str(year) + "-07-01"
-month = "June"
+endDate = str(year) + "-08-01"
+month = "July"
 
 S2cloudCover = 15
 L89cloudCover = 20 
@@ -42,14 +41,13 @@ CONUStrainingLabel = TrustedPixel.trustedPixels(year,7)
 root_path = '/content/drive/MyDrive/'
 L89tileFolder = 'AutoInseasonL89_MappingTest'
 S2tileFolder = 'AutoInseasonS2_MappingTest'
-local_root_folder = '../DownloadClassifications'
-mosaicfolder_path = '../DownloadClassifications/AutoInseasonL89S2_Mosaic'
+local_root_folder = '../DownloadClassifications/'
+mosaicfolder_path = '../DownloadClassifications/AutoInseasonL89S2_Result/'
 
 l89_name = month + "_L89mosaic.tif"
 s2_name = month + "_S2mosaic.tif"
 
-
-# # Define a geometry to cover Conterminous U.S.
+# Define a geometry to cover Conterminous U.S.
 CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
                     .filter(ee.Filter.neq('NAME', 'United States Virgin Islands'))
                     .filter(ee.Filter.neq('NAME', 'Puerto Rico'))
@@ -90,9 +88,9 @@ if __name__ == '__main__':
     erdas_name_10m = f'{month}{year}CropMap10m.img'
     shapefile = "../ShapeFile/CONUS_boundary_5070.shp"
 
-    mosaicedFilePath_10m = mosaicfolder_path + '/' + mosaic_name_10m
-    clippedFilePath_10m = mosaicfolder_path + '/' + clip_name_10m
-    output_erdas_path_10m = mosaicfolder_path + '/' + erdas_name_10m
+    mosaicedFilePath_10m = mosaicfolder_path +  mosaic_name_10m
+    clippedFilePath_10m = mosaicfolder_path +  clip_name_10m
+    output_erdas_path_10m = mosaicfolder_path + erdas_name_10m
     # Mosaic S2 and Landsat8/9 mosaiced image
     try:
         MosaicL89S2.mosaic_L89_S2_gdal(mosaicfolder_path, l89_name, s2_name, mosaic_name_10m)
@@ -100,13 +98,13 @@ if __name__ == '__main__':
         print(f"Mosaicking failed: {e}")
 
 
-    # clip mosaiced image by using CONUS shape file, output COG with color tabel
+    # # clip mosaiced image by using CONUS shape file, output COG with color tabel
     try:
         ClipRasterByShp.clip_raster_to_cog(mosaicedFilePath_10m, shapefile, clippedFilePath_10m)
     except Exception as e:
         print(f"ClipRaster failed: {e}")
 
-    # convert 10m COG to 10m ERDAS IMG
+    # # convert 10m COG to 10m ERDAS IMG
     try:
         ErdasConvert.convert_tiff_to_erdas(clippedFilePath_10m, output_erdas_path_10m)
     except Exception as e:
@@ -116,8 +114,8 @@ if __name__ == '__main__':
     # pre-set file's name and path for 30m
     resample30mCOG_name = f'{month}{year}CropMap30m.tif'
     erdas_name30m = f'{month}{year}CropMap30m.img'
-    resample30mCOG_path = mosaicfolder_path + '/' + resample30mCOG_name
-    output_erdas_path30m = mosaicfolder_path + '/' + erdas_name30m
+    resample30mCOG_path = mosaicfolder_path + resample30mCOG_name
+    output_erdas_path30m = mosaicfolder_path + erdas_name30m
 
     # resample 10m COG to 30m COG, output COG with color tabel
     try:
@@ -136,23 +134,38 @@ if __name__ == '__main__':
     l89_path = mosaicfolder_path + l89_name
     s2_path = mosaicfolder_path + s2_name
 
+    # delete l89 mosaic image
     try:
         if os.path.exists(l89_path):
             os.remove(l89_path)
     except PermissionError:
         print(f"Warning: Could not delete {l89_path} due to permission error.")
 
+    # delete s2 mosaic image
     try:
         if os.path.exists(s2_path):
             os.remove(s2_path)
     except PermissionError:
         print(f"Warning: Could not delete {s2_path} due to permission error.")
         
+    # delete l89+s2 mosaic image       
     try:
         if os.path.exists(mosaicedFilePath_10m):
             os.remove(mosaicedFilePath_10m)
     except PermissionError:
         print(f"Warning: Could not delete {mosaicedFilePath_10m} due to permission error.")
+
+    # delete folder of download classification  
+    L89tilePath = local_root_folder + L89tileFolder
+    S2tilePath = local_root_folder + S2tileFolder
+    print('L89tilePath,S2tilePath', L89tilePath,S2tilePath)  
+    try:
+        if os.path.exists(L89tilePath):
+            shutil.rmtree(L89tilePath)
+        if os.path.exists(S2tilePath):
+            shutil.rmtree(S2tilePath)
+    except PermissionError:
+        print(f"Warning: Could not delete {L89tilePath} or{S2tilePath} due to permission error.")
 
 
     # ===========Delete classification images from Google Drive==============
@@ -160,3 +173,4 @@ if __name__ == '__main__':
     print("Ready to delete files in Drive folder")
     DeleteDriveFiles.delete_drive_files(L89tileFolder)
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
+    print('All in-season maps in {} have been produced, please access data via path: {mosaicfolder_path}')

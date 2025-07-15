@@ -1,4 +1,6 @@
 from osgeo import gdal
+import ColorTable
+import ColorTool
 
 def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
                        compression="LZW", nodata_value=0):
@@ -54,12 +56,12 @@ def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
         # WarpMemoryLimit=512 * 1024 * 1024  # Example: 512MB
     )
 
+    # conduct clip processing
     try:
         gdal.Warp(output_cog_path, input_raster_path, options=warp_options)
-        print(f"Raster '{input_raster_path}' clipped and saved as COG successfully to '{output_cog_path}'.")
+        print(f"Clipping-Raster '{input_raster_path}' clipped and saved as COG successfully to '{output_cog_path}'.")
     except Exception as e:
         print(f"Error clipping raster to COG: {e}")
-
 
 
 

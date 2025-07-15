@@ -13,7 +13,7 @@ def authenticate_drive():
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
     else:
-        flow = InstalledAppFlow.from_client_secrets_file('../KEY/deleteDriveCredential.json', SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file('../KEY/credentials.json', SCOPES)
         creds = flow.run_local_server(port=0)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
@@ -25,7 +25,7 @@ def get_folder_id_by_name(service, folder_name):
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
     else:
-        flow = InstalledAppFlow.from_client_secrets_file('../KEY/credentials.json', SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file('../KEY/deleteDriveCredential.json', SCOPES)
         creds = flow.run_local_server(port=0)
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
@@ -98,8 +98,3 @@ def delete_drive_files(folder_name):
     folder_id = get_folder_id_by_name(drive_service, folder_name)
     if folder_id:
         delete_all_files_in_folder(drive_service, folder_id)
-
-
-# Target folder name
-# folder = 'AutoInseasonL89_MappingTest'
-# delete_drive_files()

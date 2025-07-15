@@ -1,7 +1,11 @@
 # Processing - Erdas IMAGE convert
 from osgeo import gdal
+import ColorTable
+import ColorTool
+gdal.UseExceptions()
 
-# %%
+
+
 def convert_tiff_to_erdas(input_tiff_path, output_erdas_path):
     """
     Converts a TIFF image to ERDAS Imagine (.img) format.
@@ -25,13 +29,15 @@ def convert_tiff_to_erdas(input_tiff_path, output_erdas_path):
 
         # Create the output dataset in ERDAS Imagine format
         # The CreateCopy method handles copying all georeferencing and band information
-        dst_ds = driver.CreateCopy(output_erdas_path, src_ds, 0, options=["COMPRESSED=YES"])
+        dst_ds = driver.CreateCopy(output_erdas_path, src_ds, 0, options=["COMPRESS=YES"])
 
         # Close the datasets to release resources
         src_ds = None
         dst_ds = None
 
         print(f"Conversion successful: {input_tiff_path} converted to {output_erdas_path}")
+        
 
     except Exception as e:
         print(f"An error occurred during conversion: {e}")
+

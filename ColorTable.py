@@ -1,8 +1,7 @@
 # %%
 # Color table: class value → (R, G, B)
 def color_table_Arc():
-  return {  0	:	(	0	,	0	,	0	),
-            1	:	(	255	,	212	,	0	),
+  return {  1	:	(	255	,	212	,	0	),
             2	:	(	255	,	38	,	38	),
             3	:	(	0	,	169	,	230	),
             4	:	(	255	,	158	,	15	),
