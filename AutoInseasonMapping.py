@@ -24,6 +24,7 @@ import time
 import DeleteDriveFiles
 import shutil
 
+
 # # Path to your downloaded JSON key
 # SERVICE_ACCOUNT = 'automatedmapping@ee-huil7073.iam.gserviceaccount.com'
 # KEY_FILE = '../KEY/ee-huil7073-0802b07b2350.json'
@@ -37,21 +38,22 @@ print(f"[{datetime.now()}] Script started")
 
 
 now = datetime.now()
+print(f"[{now}] Script started")
 current_year = now.year
 print("Year:", current_year)
 
 year = current_year
-startDate = str(year) + "-05-01"
-endDate = str(year) + "-08-01"
-month = "July"
+startDate = f"{year}-05-01"
+endDate = datetime.now().strftime('%Y-%m-%d') 
+month = now.strftime("%B") 
 
 S2cloudCover = 15
 L89cloudCover = 20 
 CONUStrainingLabel = TrustedPixel.trustedPixels(year,7)
 
 root_path = '/content/drive/MyDrive/'
-L89tileFolder = 'AutoInseasonL89_MappingTest'
-S2tileFolder = 'AutoInseasonS2_MappingTest'
+L89tileFolder = 'AutoInseasonL89_Mapping'
+S2tileFolder = 'AutoInseasonS2_Mapping'
 local_root_folder = '/home/hli47/InseasonMapping/Results/'
 mosaicfolder_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Result/'
 
@@ -185,6 +187,5 @@ if __name__ == '__main__':
     DeleteDriveFiles.delete_drive_files(L89tileFolder)
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
     print('All in-season maps in {} have been produced, please access data via path: {mosaicfolder_path}')
-    
-    
+
     print(f"[{datetime.now()}] Script end")
