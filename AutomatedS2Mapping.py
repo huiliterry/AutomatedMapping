@@ -105,8 +105,8 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
   remap_target = RemapTable.resetValueList()
 
   # classification for each single tile
-  # for i in range(935,numList):
-  for i in range(0,1):
+  for i in range(numList):
+  # for i in range(0,1):
     tile = S2_tilelist[i]
     print(i, tile)
     classified_dictionary = ee.Dictionary(imgS2Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel))
