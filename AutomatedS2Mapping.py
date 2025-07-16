@@ -4,7 +4,7 @@ import ee
 import DownloadTool
 import MosaicMultiImg
 import RemapTable
-import DeleteDriveFiles
+from datetime import datetime
 
 
 # single S2 tile classification
@@ -117,7 +117,9 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
       # classified image was remapped as new pixel values and clipped by CONUS boundary
       classified =ee.Image(classified_dictionary.get('image')).remap(remap_original,remap_target)
       region = ee.Geometry(classified_dictionary.get('region'))
-      description = month+'_'+classified_dictionary.get('description').getInfo()
+      year = datetime.now().year
+      description = month + str(year)+ '_' + classified_dictionary.get('description').getInfo()
+
 
       task = ee.batch.Export.image.toDrive(
           image = classified,
