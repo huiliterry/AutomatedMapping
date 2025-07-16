@@ -19,6 +19,8 @@ def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
     """
 
     gdal.UseExceptions()
+    # Set GDAL cache to 5 GB
+    gdal.SetCacheMax(5120 * 1024 * 1024)  # 5120 MB = 5 GB
 
     # Determine nodata value if not provided
     if nodata_value is None:
@@ -34,26 +36,20 @@ def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
     # These options are automatically handled by the COG driver in GDAL 3.1+
     # but explicitly stating them can ensure the desired configuration.
     cog_creation_options = [
-        "COMPRESS={}".format(compression),  # Use specified compression
-        "BIGTIFF=YES",                # Handle files > 4GB
-        "NUM_THREADS=ALL_CPUS",             # Use all CPU cores for processing/compression
-        "BLOCKSIZE=512"                     # Tile size (e.g., 256x256 pixels)
+        f"COMPRESS={compression}",
+        "BIGTIFF=YES",
+        "NUM_THREADS=ALL_CPUS",
+        "BLOCKSIZE=1024",
+        "OPTIMIZE_SIZE=TRUE"
     ]
-    # For some compressions like JPEG, PHOTOMETRIC=YCBCR is recommended for better results, {Link: according to the GDAL documentation https://gdal.org/en/stable/drivers/raster/gtiff.html}
-    if compression == "JPEG":
-        cog_creation_options.append("PHOTOMETRIC=YCBCR")
-        cog_creation_options.append("JPEG_QUALITY=80") # Adjust quality (0-100)
-
-    cog_warp_options = ["OPTIMIZE_SIZE=TRUE"]
+    # Setup warp
     warp_options = gdal.WarpOptions(
-        format="COG",  # **Specify output format as COG**
+        format="COG",
         cutlineDSName=shapefile_path,
         cropToCutline=True,
         dstNodata=nodata_value,
         creationOptions=cog_creation_options,
-        warpOptions = cog_warp_options
-        # Potentially increase WarpMemoryLimit for very large files and sufficient RAM
-        # WarpMemoryLimit=512 * 1024 * 1024  # Example: 512MB
+        resampleAlg=gdal.GRA_NearestNeighbour  # or GRA_Bilinear for continuous data
     )
 
     # conduct clip processing

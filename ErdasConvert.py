@@ -15,6 +15,8 @@ def convert_tiff_to_erdas(input_tiff_path, output_erdas_path):
         output_erdas_path (str): Path for the output ERDAS Imagine file.
     """
     try:
+        # Set GDAL cache to 5 GB
+        gdal.SetCacheMax(5120 * 1024 * 1024)  # 5120 MB = 5 GB
         # Open the input TIFF dataset
         src_ds = gdal.Open(input_tiff_path)
         if src_ds is None:
