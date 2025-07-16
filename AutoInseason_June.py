@@ -36,24 +36,22 @@ import shutil
 from datetime import datetime
 print(f"[{datetime.now()}] Script started")
 
-
 now = datetime.now()
-print(f"[{now}] Script started")
 current_year = now.year
 print("Year:", current_year)
 
 year = current_year
-startDate = f"{year}-05-01"
-endDate = datetime.now().strftime('%Y-%m-%d') 
-month = now.strftime("%B") 
+startDate = str(year) + "-05-01"
+endDate = str(year) + "-07-01"
+month = "June"
 
 S2cloudCover = 15
 L89cloudCover = 20 
 CONUStrainingLabel = TrustedPixel.trustedPixels(year,7)
 
 root_path = '/content/drive/MyDrive/'
-L89tileFolder = 'AutoInseasonL89_Mapping'
-S2tileFolder = 'AutoInseasonS2_Mapping'
+L89tileFolder = 'AutoInseasonL89_MappingTest'
+S2tileFolder = 'AutoInseasonS2_MappingTest'
 local_root_folder = '/home/hli47/InseasonMapping/Results/'
 mosaicfolder_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Result/'
 
@@ -188,4 +186,5 @@ if __name__ == '__main__':
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
     print('All in-season maps in {} have been produced, please access data via path: {mosaicfolder_path}')
 
+    
     print(f"[{datetime.now()}] Script end")
