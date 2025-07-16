@@ -142,7 +142,7 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
         print(statuses)  # Optional: track task progress
         if all(state in ['COMPLETED', 'FAILED', 'CANCELLED'] for state in statuses):
             break
-        time.sleep(30)  # Wait 30 seconds before checking again
+        time.sleep(60)  # Wait 60 seconds before checking again
 
   # Call the monitoring function
   wait_for_tasks(taskList)

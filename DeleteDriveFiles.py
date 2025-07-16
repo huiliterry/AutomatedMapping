@@ -65,3 +65,5 @@ def delete_drive_files(folder_name):
     folder_id = get_folder_id_by_name(drive_service, folder_name)
     if folder_id:
         delete_all_files_in_folder(drive_service, folder_id)
+
+delete_drive_files('AutoInseasonL89_Mapping')
