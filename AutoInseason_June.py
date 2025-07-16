@@ -33,6 +33,9 @@ import shutil
 # credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT, KEY_FILE)
 # ee.Initialize(credentials)
 
+from datetime import datetime
+print(f"[{datetime.now()}] Script started")
+
 now = datetime.now()
 current_year = now.year
 print("Year:", current_year)
@@ -49,11 +52,11 @@ CONUStrainingLabel = TrustedPixel.trustedPixels(year,7)
 root_path = '/content/drive/MyDrive/'
 L89tileFolder = 'AutoInseasonL89_MappingTest'
 S2tileFolder = 'AutoInseasonS2_MappingTest'
-local_root_folder = '../Results/'
-mosaicfolder_path = '../Results/AutoInseasonL89S2_Result/'
+local_root_folder = '/home/hli47/InseasonMapping/Results/'
+mosaicfolder_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Result/'
 
-l89_name = month + "_L89mosaic.tif"
-s2_name = month + "_S2mosaic.tif"
+l89_name = f"{month}{year}_L89mosaic.tif"
+s2_name = f"{month}{year}_S2mosaic.tif"
 
 # Define a geometry to cover Conterminous U.S.
 CONUSBoundary = (ee.FeatureCollection("TIGER/2018/States")
@@ -94,7 +97,7 @@ if __name__ == '__main__':
     mosaic_name_10m = f"{month}{year}CropMapMosaiced.tif"
     clip_name_10m = f"{month}{year}CropMap10m.tif"
     erdas_name_10m = f'{month}{year}CropMap10m.img'
-    shapefile = "../ShapeFile/CONUS_boundary_5070.shp"
+    shapefile = "/home/hli47/InseasonMapping/ShapeFile/CONUS_boundary_5070.shp"
 
     mosaicedFilePath_10m = mosaicfolder_path +  mosaic_name_10m
     clippedFilePath_10m = mosaicfolder_path +  clip_name_10m
@@ -182,3 +185,6 @@ if __name__ == '__main__':
     DeleteDriveFiles.delete_drive_files(L89tileFolder)
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
     print('All in-season maps in {} have been produced, please access data via path: {mosaicfolder_path}')
+
+    
+    print(f"[{datetime.now()}] Script end")

@@ -32,7 +32,7 @@ def list_all_files_in_folder(service, folder_id):
 # create service account key in Google Cloud, download key .json, share downloadable folders to created service account
 def downloadfiles_byserviceaccout(target_name, local_folder):
     # Load your service account key
-    SERVICE_ACCOUNT_FILE = '../KEY/ee-huil7073-0802b07b2350.json'
+    SERVICE_ACCOUNT_FILE = '/home/hli47/InseasonMapping/KEY/ee-huil7073-0802b07b2350.json'
     # SERVICE_ACCOUNT_FILE= os.path.join("..","KEY",'ee-huil7073-81b7212a3bd2.json')
     SCOPES = ['https://www.googleapis.com/auth/drive']
 
