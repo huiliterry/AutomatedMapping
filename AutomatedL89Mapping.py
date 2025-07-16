@@ -121,8 +121,8 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   remap_original = RemapTable.originalValueList()
   remap_target = RemapTable.resetValueList()
   # classification for each single tile
-#   for i in range(numList):
-  for i in range(0,1):
+  for i in range(numList):
+  # for i in range(0,1):
     tile = pathrowlist[i]
     print(i, tile)
     classified_dictionary = ee.Dictionary(imgL89Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel))
