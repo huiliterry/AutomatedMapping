@@ -10,12 +10,12 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 # load credentials and token, return servive object
 def authenticate_drive():
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists('/home/hli47/InseasonMapping/KEY/token.json'):
+        creds = Credentials.from_authorized_user_file('/home/hli47/InseasonMapping/KEY/token.json', SCOPES)
     else:
-        flow = InstalledAppFlow.from_client_secrets_file('/home/hli47/InseasonMapping/KEY/credentials.json', SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file('/home/hli47/InseasonMapping/KEY/deleteDriveCredential.json', SCOPES)
         creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
+        with open('/home/hli47/InseasonMapping/KEY/token.json', 'w') as token:
             token.write(creds.to_json())
     return build('drive', 'v3', credentials=creds)
 
@@ -39,39 +39,6 @@ def get_folder_id_by_name(service, folder_name):
         return None
     print(f"Found folder '{folder_name}' with ID: {folders[0]['id']}")
     return folders[0]['id']  # Return the first match
-
-# loop all files in the folder and conduct delete
-# def delete_all_files_in_folder(service, folder_id):
-#     query = f"'{folder_id}' in parents and trashed = false"
-#     results = service.files().list(q=query, fields="files(id, name)").execute()
-#     files = results.get('files', [])
-#     print('files',files)
-
-#     while True:
-#         response = service.files().list(
-#             q=query,
-#             spaces='drive',
-#             fields="nextPageToken, files(id, name)",
-#             pageSize=1000,
-#             pageToken=page_token
-#         ).execute()
-
-#         files = response.get('files', [])
-
-#         if not files:
-#             break
-
-#         for file in files:
-#             try:
-#                 service.files().delete(fileId=file['id']).execute()
-#                 deleted_count += 1
-#                 print(f"✅ Deleted: {file['name']}")
-#             except Exception as e:
-#                 print(f"⚠️ Failed to delete {file['name']}: {e}")
-
-#         page_token = response.get('nextPageToken', None)
-#         if page_token is None:
-#             break
 
 def delete_all_files_in_folder(service, folder_id):
     files = DownloadTool.list_all_files_in_folder(service, folder_id)
