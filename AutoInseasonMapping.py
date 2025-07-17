@@ -36,13 +36,15 @@ import shutil
 
 start_time = datetime.now()
 print(f"[{start_time}] Script started")
-current_year = start_time.year
-print("Year:", current_year)
+year = start_time.year
+print("Year:", year)
 
-year = current_year
+
 startDate = f"{year}-05-01"
-endDate = datetime.start_time().strftime('%Y-%m-%d') 
+endDate = datetime.now().strftime('%Y-%m-%d') 
 month = start_time.strftime("%B") 
+print("startDate:endDate:month", startDate,endDate,month)
+
 
 S2cloudCover = 15
 L89cloudCover = 20 
@@ -184,6 +186,7 @@ if __name__ == '__main__':
     DeleteDriveFiles.delete_drive_files(L89tileFolder)
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
     print('All in-season maps in {} have been produced, please access data via path: {mosaicfolder_path}')
+
 
     end_time = datetime.now()
     print(f"[{end_time}] Script end")
