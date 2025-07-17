@@ -33,19 +33,16 @@ import shutil
 # credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT, KEY_FILE)
 # ee.Initialize(credentials)
 
-from datetime import datetime
-print(f"[{datetime.now()}] Script started")
 
-
-now = datetime.now()
-print(f"[{now}] Script started")
-current_year = now.year
+start_time = datetime.now()
+print(f"[{start_time}] Script started")
+current_year = start_time.year
 print("Year:", current_year)
 
 year = current_year
 startDate = f"{year}-05-01"
-endDate = datetime.now().strftime('%Y-%m-%d') 
-month = now.strftime("%B") 
+endDate = datetime.start_time().strftime('%Y-%m-%d') 
+month = start_time.strftime("%B") 
 
 S2cloudCover = 15
 L89cloudCover = 20 
@@ -188,4 +185,8 @@ if __name__ == '__main__':
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
     print('All in-season maps in {} have been produced, please access data via path: {mosaicfolder_path}')
 
-    print(f"[{datetime.now()}] Script end")
+    end_time = datetime.now()
+    print(f"[{end_time}] Script end")
+    elapsed = end_time - start_time
+    hh_mm_ss = str(elapsed).split('.')[0]
+    print("Elapsed Time:", hh_mm_ss)
