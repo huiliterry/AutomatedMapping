@@ -21,16 +21,6 @@ def authenticate_drive():
 
 # search folder matching the input folder name
 def get_folder_id_by_name(service, folder_name):
-    creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    else:
-        flow = InstalledAppFlow.from_client_secrets_file('../KEY/deleteDriveCredential.json', SCOPES)
-        creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
-    service = build('drive', 'v3', credentials=creds)
-
     query = f"name = '{folder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
     results = service.files().list(q=query, fields="files(id, name)").execute()
     folders = results.get('files', [])
@@ -65,5 +55,3 @@ def delete_drive_files(folder_name):
     folder_id = get_folder_id_by_name(drive_service, folder_name)
     if folder_id:
         delete_all_files_in_folder(drive_service, folder_id)
-
-delete_drive_files('AutoInseasonL89_Mapping')
