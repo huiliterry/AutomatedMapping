@@ -48,7 +48,7 @@ def imgL89Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel):
     tileTrainingLabel = CONUStrainingLabel.clip(tileGeometry)
     # training samples generation by stratified sampling method
     trainingSample = tileImage.addBands(tileTrainingLabel).stratifiedSample(
-      numPoints = 2000,
+      numPoints = 1500,
       classBand= 'cropland',
       region= tileGeometry,
       scale= 10
@@ -133,8 +133,7 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
       # classified image was remapped as new pixel values and clipped by CONUS boundary
       classified =ee.Image(classified_dictionary.get('image')).remap(remap_original,remap_target)
       region = ee.Geometry(classified_dictionary.get('region'))
-      year = datetime.now().year
-      description = month + str(year)+ '_' + classified_dictionary.get('description').getInfo()
+      description = month + '_' + imgID
 
       task = ee.batch.Export.image.toDrive(
           image = classified,
@@ -147,7 +146,7 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
       )
       task.start()
       taskList.append(task)
-      print(f"Export task '{classified_dictionary.get('description').getInfo()}' started. Check Google Drive {tileFolder} folder.")
+      print(f"Export task '{description}' started. Check Google Drive {tileFolder} folder.")
 
   # Function to monitor task completion
   def wait_for_tasks(tasks):
