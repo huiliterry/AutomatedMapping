@@ -187,7 +187,7 @@ if __name__ == '__main__':
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
     print('All in-season maps in {} have been produced, please access data via path: {mosaicfolder_path}')
 
-
+    # calculate and return elapsed time at the end of script running
     end_time = datetime.now()
     print(f"[{end_time}] Script end")
     elapsed = end_time - start_time
