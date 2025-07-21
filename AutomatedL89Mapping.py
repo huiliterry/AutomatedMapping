@@ -48,7 +48,7 @@ def imgL89Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel):
     tileTrainingLabel = CONUStrainingLabel.clip(tileGeometry)
     # training samples generation by stratified sampling method
     trainingSample = tileImage.addBands(tileTrainingLabel).stratifiedSample(
-      numPoints = 10000,
+      numPoints = 1800,
       classBand= 'cropland',
       region= tileGeometry,
       scale= 10
@@ -196,7 +196,7 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   # mosaic all classified images when finishing download
   try:
     time.sleep(30) # Wait for 30 seconds before checking again
-    print("Ready to mosaic")
+    print("Ready to mosaic multiple L89 classifications")
     sourceFolder = os.path.join(local_root_folder, tileFolder)
     MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
   except:
