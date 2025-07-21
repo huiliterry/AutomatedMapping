@@ -29,6 +29,29 @@ def list_all_files_in_folder(service, folder_id):
 
     return files
 
+# A recursive file search
+def list_all_files_recursive(service, folder_id):
+    all_files = []
+    stack = [folder_id]
+
+    while stack:
+        current_id = stack.pop()
+        query = f"'{current_id}' in parents and trashed=false"
+        response = service.files().list(
+            q=query,
+            spaces='drive',
+            fields="files(id, name, mimeType)",
+            pageSize=1000
+        ).execute()
+
+        for f in response.get('files', []):
+            if f['mimeType'] == 'application/vnd.google-apps.folder':
+                stack.append(f['id'])  # recurse into subfolders
+            else:
+                all_files.append(f)
+    return all_files
+
+
 # create service account key in Google Cloud, download key .json, share downloadable folders to created service account
 def downloadfiles_byserviceaccout(target_name, local_folder):
     # Load your service account key
@@ -40,7 +63,7 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
 
     drive_service = build('drive', 'v3', credentials=creds)
 
-    # List shared files
+    # List shared folders
     results = drive_service.files().list(q=f"name = '{target_name}' and trashed = false", pageSize=10, fields="files(id, name)").execute()
     print('results',results.get('files'))
 
@@ -57,7 +80,7 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
         print('local_file_path',local_file_path)
 
         # Search for all files in this Drive folder
-        filesList = list_all_files_in_folder(drive_service, folder_id)
+        filesList = list_all_files_recursive(drive_service, folder_id)
         print('filesList',len(filesList))
         if len(filesList) == 0:
              break
@@ -79,3 +102,4 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
                 time.sleep(1)
 
         print(f"{download_file_number} files were downloaded to: {local_file_path}")
+
