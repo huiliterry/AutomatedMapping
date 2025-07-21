@@ -6,6 +6,7 @@ ee.Authenticate()
 ee.Initialize(project='ee-huil7073')
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import os
 from osgeo import gdal
 from google.oauth2 import service_account
@@ -35,17 +36,17 @@ import shutil
 
 
 start_time = datetime.now()
-# print(f"[{start_time}] Script started")
-# year = start_time.year
-# print("Year:", year)
+print(f"[{start_time}] Script started")
+year = start_time.year
+print("Year:", year)
 
-
-# startDate = f"{year}-05-01"
-# endDate = datetime.now().strftime('%Y-%m-%d') 
+startDate = f"{year}-05-01"
+endDate = datetime.now().strftime('%Y-%m-%d') 
 # month = start_time.strftime("%B") 
-# print("startDate:endDate:month", startDate,endDate,month)
+month = (start_time - relativedelta(months=1)).strftime("%B")  # Previous month
+print("startDate:endDate:month", startDate,endDate,month)
 
-year, startDate, endDate, month = 2025, "2025-05-01","2025-07-17", "July"
+# year, startDate, endDate, month = 2025, "2025-05-01","2025-07-17", "July"
 
 S2cloudCover = 15
 L89cloudCover = 20 
@@ -191,7 +192,7 @@ if __name__ == '__main__':
     print("Ready to delete files in Drive folder")
     DeleteDriveFiles.delete_drive_files(L89tileFolder)
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
-    print('All in-season maps in {} have been produced, please access data via path: {mosaicfolder_path}')
+    print(f'All in-season maps in {endDate} have been produced, please access data via path: {mosaicfolder_path}')
 
     # calculate and return elapsed time at the end of script running
     end_time = datetime.now()
