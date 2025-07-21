@@ -6,7 +6,6 @@ ee.Authenticate()
 ee.Initialize(project='ee-huil7073')
 
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 import os
 from osgeo import gdal
 from google.oauth2 import service_account
@@ -42,8 +41,17 @@ print("Year:", year)
 
 startDate = f"{year}-05-01"
 endDate = datetime.now().strftime('%Y-%m-%d') 
-# month = start_time.strftime("%B") 
-month = (start_time - relativedelta(months=1)).strftime("%B")  # Previous month
+
+month_num = start_time.month
+# Move to previous month
+if month_num == 1:
+    prev_month_num = 12
+    prev_month_year = year - 1
+else:
+    prev_month_num = month_num - 1
+    prev_month_year = year
+
+month = datetime(prev_month_year, prev_month_num, 1).strftime("%B")
 print("startDate:endDate:month", startDate,endDate,month)
 
 # year, startDate, endDate, month = 2025, "2025-05-01","2025-07-17", "July"
