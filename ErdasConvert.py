@@ -1,7 +1,5 @@
 # Processing - Erdas IMAGE convert
 from osgeo import gdal
-import ColorTable
-import ColorTool
 gdal.UseExceptions()
 
 

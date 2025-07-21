@@ -37,7 +37,7 @@ def imgS2Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel):
     tileTrainingLabel = CONUStrainingLabel.clip(tileGeometry)
     # training samples generation by stratified sampling method
     trainingSample = tileImage.addBands(tileTrainingLabel).stratifiedSample(
-      numPoints = 1500,
+      numPoints = 10000,
       classBand= 'cropland',
       region= tileGeometry,
       scale= 10
@@ -105,55 +105,83 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
   remap_target = RemapTable.resetValueList()
 
   # classification for each single tile
-  for i in range(numList):
-  # for i in range(0,1):
+  for i in range(numList):#[1]:#
     tile = S2_tilelist[i]
     print(i, tile)
-    classified_dictionary = ee.Dictionary(imgS2Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel))
-    # display(classified_dictionary)
-    imgID =classified_dictionary.get('description').getInfo()
-    # print('ifnull',ifnull)
-    if imgID != 'null':
-      # classified image was remapped as new pixel values and clipped by CONUS boundary
-      classified =ee.Image(classified_dictionary.get('image')).remap(remap_original,remap_target)
-      region = ee.Geometry(classified_dictionary.get('region'))
-      description = month + '_' + imgID
+
+    try:
+        # This step usually does not trigger computation; it's lazy
+        classified_dictionary = ee.Dictionary(imgS2Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel))
+        
+        # This line triggers a server-side computation (potential failure point)
+        try:
+            imgID = classified_dictionary.get('description').getInfo()
+        except Exception as e:
+            print(f"[SKIPPED] Failed to get imgID for tile {tile}: {e}")
+            continue
+
+        if imgID and imgID != 'null':
+            try:
+                classified = ee.Image(classified_dictionary.get('image')).remap(remap_original, remap_target)
+                region = ee.Geometry(classified_dictionary.get('region'))
+                description = month + '_' + imgID
+
+                task = ee.batch.Export.image.toDrive(
+                    image=classified,
+                    description=description,
+                    folder=tileFolder,
+                    region=region,
+                    scale=10,
+                    crs='EPSG:5070',
+                    maxPixels=1e12
+                )
+                task.start()
+                taskList.append(task)
+                print(f"Export task '{description}' started. Check Google Drive {tileFolder} folder.")
+            except Exception as e:
+                print(f"[SKIPPED] Error setting up export for tile {tile}: {e}")
+                continue
+        else:
+            print(f"[SKIPPED] imgID is null for tile {tile}")
+
+    except Exception as e:
+        print(f"[ERROR] Unexpected failure for tile {tile}: {e}")
+        continue
 
 
-      task = ee.batch.Export.image.toDrive(
-          image = classified,
-          description = description,
-          folder = tileFolder,
-          region = region, # Ensure region is a list of coordinates
-          scale = 10, # Resolution of your output image
-          crs = 'EPSG:5070', # Coordinate Reference System
-          maxPixels = 1e12 # Increase if you encounter "Too many pixels" error
-      )
-      task.start()
-      taskList.append(task)
-      print(f"Export task '{description}' started. Check Google Drive {tileFolder} folder.")
+  # watiing for uploading finish
+  try:
+    # Function to monitor task completion
+    def wait_for_tasks(tasks):
+        print("Waiting for all export tasks to complete...")
+        while True:
+            statuses = [task.status()['state'] for task in tasks]
+            print(statuses)  # Optional: track task progress
+            if all(state in ['COMPLETED', 'FAILED', 'CANCELLED'] for state in statuses):
+                break
+            time.sleep(60)  # Wait 60 seconds before checking again
 
-  # Function to monitor task completion
-  def wait_for_tasks(tasks):
-    print("Waiting for all export tasks to complete...")
-    while True:
-        statuses = [task.status()['state'] for task in tasks]
-        print(statuses)  # Optional: track task progress
-        if all(state in ['COMPLETED', 'FAILED', 'CANCELLED'] for state in statuses):
-            break
-        time.sleep(60)  # Wait 60 seconds before checking again
+    # Call the monitoring function
+    wait_for_tasks(taskList)
+    print("Landsad 8/9 dataset classification done.")
+  except:
+    print("Something wrong during classification task conducting")
 
-  # Call the monitoring function
-  wait_for_tasks(taskList)
-  print("Sentinel-2 dataset classification done.")
-
+  
   # download all classified images when finishing upload  
-  time.sleep(30) # Wait for 30 seconds before checking again 
-  print("Ready to download")
-  DownloadTool.downloadfiles_byserviceaccout(tileFolder, local_root_folder)
+  try:
+    time.sleep(30) # Wait for 30 seconds before checking again
+    print("Ready to download")
+    DownloadTool.downloadfiles_byserviceaccout(tileFolder, local_root_folder)
+  except:
+    print("Something wrong during classification downloading")
+
 
   # mosaic all classified images when finishing download
-  time.sleep(30) # Wait for 30 seconds before checking again
-  print("Ready to mosaic")
-  sourceFolder = os.path.join(local_root_folder, tileFolder)
-  MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
+  try:
+    time.sleep(30) # Wait for 30 seconds before checking again
+    print("Ready to mosaic")
+    sourceFolder = os.path.join(local_root_folder, tileFolder)
+    MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
+  except:
+    print("Something wrong in multi-image mosaic")

@@ -35,16 +35,17 @@ import shutil
 
 
 start_time = datetime.now()
-print(f"[{start_time}] Script started")
-year = start_time.year
-print("Year:", year)
+# print(f"[{start_time}] Script started")
+# year = start_time.year
+# print("Year:", year)
 
 
-startDate = f"{year}-05-01"
-endDate = datetime.now().strftime('%Y-%m-%d') 
-month = start_time.strftime("%B") 
-print("startDate:endDate:month", startDate,endDate,month)
+# startDate = f"{year}-05-01"
+# endDate = datetime.now().strftime('%Y-%m-%d') 
+# month = start_time.strftime("%B") 
+# print("startDate:endDate:month", startDate,endDate,month)
 
+year, startDate, endDate, month = 2025, "2025-05-01","2025-07-17", "July"
 
 S2cloudCover = 15
 L89cloudCover = 20 
@@ -105,6 +106,7 @@ if __name__ == '__main__':
     output_erdas_path_10m = mosaicfolder_path + erdas_name_10m
     # Mosaic S2 and Landsat8/9 mosaiced image
     try:
+        print('Ready to mosaic 10m L89mosaic and S2mosaic')
         MosaicL89S2.mosaic_L89_S2_gdal(mosaicfolder_path, l89_name, s2_name, mosaic_name_10m)
     except Exception as e:
         print(f"Mosaicking failed: {e}")
@@ -112,12 +114,14 @@ if __name__ == '__main__':
 
     # # clip mosaiced image by using CONUS shape file, output COG with color tabel
     try:
+        print('Ready to clip 10m raster by CONUS shp_file')
         ClipRasterByShp.clip_raster_to_cog(mosaicedFilePath_10m, shapefile, clippedFilePath_10m)
     except Exception as e:
         print(f"ClipRaster failed: {e}")
 
     # # convert 10m COG to 10m ERDAS IMG
     try:
+        print('Ready to convert 10m COG raster to Erdas IMG')
         ErdasConvert.convert_tiff_to_erdas(clippedFilePath_10m, output_erdas_path_10m)
     except Exception as e:
         print(f"Convert ERDAS IMG failed: {e}")
@@ -131,12 +135,14 @@ if __name__ == '__main__':
 
     # resample 10m COG to 30m COG, output COG with color tabel
     try:
+        print('Ready to resample 10m COG raster to 10m')
         ResampleTool.resample(clippedFilePath_10m,resample30mCOG_path,'COG',30)
     except Exception as e:
         print(f"Add color failed: {e}")
 
     # convert 30m COG to 30m ERDAS IMG
     try:
+        print('Ready to convert 30m COG raster to Erdas IMG')
         ErdasConvert.convert_tiff_to_erdas(resample30mCOG_path, output_erdas_path30m)
     except Exception as e:
         print(f"Convert ERDAS IMG failed: {e}")

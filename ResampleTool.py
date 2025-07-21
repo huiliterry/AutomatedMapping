@@ -1,5 +1,3 @@
-import ColorTable
-import ColorTool
 from osgeo import gdal
 gdal.UseExceptions()
 

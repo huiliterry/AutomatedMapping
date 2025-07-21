@@ -31,7 +31,7 @@ def get_folder_id_by_name(service, folder_name):
     return folders[0]['id']  # Return the first match
 
 def delete_all_files_in_folder(service, folder_id):
-    files = DownloadTool.list_all_files_in_folder(service, folder_id)
+    files = DownloadTool.list_all_files_recursive(service, folder_id)
     print('files',len(files))
 
     if not files:
@@ -42,7 +42,7 @@ def delete_all_files_in_folder(service, folder_id):
         try:
             service.files().delete(fileId=file['id']).execute()
             deleted_count += 1
-            # print(f"Deleted: {file['name']}")
+            print(f"Deleted: {file['name']}")
         except Exception as e:
             print(f"Failed to delete {file['name']}: {e}")
     
@@ -55,3 +55,4 @@ def delete_drive_files(folder_name):
     folder_id = get_folder_id_by_name(drive_service, folder_name)
     if folder_id:
         delete_all_files_in_folder(drive_service, folder_id)
+

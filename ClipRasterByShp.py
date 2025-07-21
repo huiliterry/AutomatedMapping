@@ -1,6 +1,4 @@
 from osgeo import gdal
-import ColorTable
-import ColorTool
 
 def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
                        compression="LZW", nodata_value=0):
