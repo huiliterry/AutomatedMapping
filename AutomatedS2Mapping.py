@@ -37,7 +37,7 @@ def imgS2Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel):
     tileTrainingLabel = CONUStrainingLabel.clip(tileGeometry)
     # training samples generation by stratified sampling method
     trainingSample = tileImage.addBands(tileTrainingLabel).stratifiedSample(
-      numPoints = 1800,
+      numPoints = 1500,
       classBand= 'cropland',
       region= tileGeometry,
       scale= 10
