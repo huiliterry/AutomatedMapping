@@ -165,17 +165,18 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
         print(f"[ERROR] Unexpected failure for tile {tile}: {e}")
         continue
 
-  # watiing for uploading finish
+  # waiting for uploading finish
   try:
     # Function to monitor task completion
     def wait_for_tasks(tasks):
         print("Waiting for all export tasks to complete...")
         while True:
             statuses = [task.status()['state'] for task in tasks]
-            print(statuses)  # Optional: track task progress
+            # print(statuses)  # Optional: track task progress
             if all(state in ['COMPLETED', 'FAILED', 'CANCELLED'] for state in statuses):
+                print(statuses)  # Optional: track task progress  
                 break
-            time.sleep(60)  # Wait 60 seconds before checking again
+            # time.sleep(60)  # Wait 60 seconds before checking again
 
     # Call the monitoring function
     wait_for_tasks(taskList)
