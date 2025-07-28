@@ -72,16 +72,16 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
     for f in results['files']:
         folder_name = f['name']
         folder_id = f['id']
-        print("folder_id",folder_id)
+        # print("folder_id",folder_id)
         
         # create local folder 
         local_file_path = os.path.join(local_folder, folder_name)
         os.makedirs(local_file_path, exist_ok=True)
-        print('local_file_path',local_file_path)
+        print('Local_file_path',local_file_path)
 
         # Search for all files in this Drive folder
         filesList = list_all_files_recursive(drive_service, folder_id)
-        print('filesList',len(filesList))
+        print('Files count:',len(filesList))
         if len(filesList) == 0:
              break
 

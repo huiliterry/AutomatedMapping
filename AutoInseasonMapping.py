@@ -40,7 +40,7 @@ year = start_time.year
 print("Year:", year)
 
 startDate = f"{year}-05-01"
-endDate = datetime.now().strftime('%Y-%m-%d') 
+# endDate = datetime.now().strftime('%Y-%m-%d') 
 
 month_num = start_time.month
 # Move to previous month
@@ -52,7 +52,7 @@ else:
     prev_month_year = year
 
 month = datetime(prev_month_year, prev_month_num, 1).strftime("%B")
-print("startDate:endDate:month", startDate,endDate,month)
+print("startDate:month", startDate,month)
 
 # year, startDate, endDate, month = 2025, "2025-05-01","2025-07-17", "July"
 
@@ -84,11 +84,11 @@ print("Generating CONUS boundary")
 
 def run_landsat():
     # image title: month+"_L89mosaic_output.tif"
-    L89MosaicClassification(startDate, endDate, month, S2cloudCover, CONUSBoundary, CONUStrainingLabel, L89tileFolder, local_root_folder, mosaicfolder_path,l89_name)
+    L89MosaicClassification(startDate, month, S2cloudCover, CONUSBoundary, CONUStrainingLabel, L89tileFolder, local_root_folder, mosaicfolder_path,l89_name)
 
 def run_sentinel():
     # image title: month+"_S2mosaic_output.tif"
-    S2MosaicClassification(startDate, endDate, month, L89cloudCover, CONUSBoundary, CONUStrainingLabel, S2tileFolder, local_root_folder, mosaicfolder_path,s2_name)
+    S2MosaicClassification(startDate, month, L89cloudCover, CONUSBoundary, CONUStrainingLabel, S2tileFolder, local_root_folder, mosaicfolder_path,s2_name)
 
 if __name__ == '__main__':
     print("Starting mapping in Sentinel-2 and Landsat8/9 datasets")
@@ -200,7 +200,7 @@ if __name__ == '__main__':
     print("Ready to delete files in Drive folder")
     DeleteDriveFiles.delete_drive_files(L89tileFolder)
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
-    print(f'All in-season maps in {endDate} have been produced, please access data via path: {mosaicfolder_path}')
+    print(f'All in-season maps in {month} have been produced, please access data via path: {mosaicfolder_path}')
 
     # calculate and return elapsed time at the end of script running
     end_time = datetime.now()

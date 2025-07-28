@@ -8,8 +8,9 @@ from datetime import datetime
 
 
 # single S2 tile classification
-def imgS2Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel):
+def imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel):
   # image selection
+  endDate = datetime.now().strftime('%Y-%m-%d')
   bands = ['B2', 'B3', 'B4', 'B8', 'B11', 'B12', 'NDVI', 'NDWI']
   S2  = (ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                         .filter(ee.Filter.eq('MGRS_TILE', tile))
@@ -93,7 +94,7 @@ def stateS2List(CONUSBoundary):
   return S2_tilelist
 
 # Function - S2 mosaic classification
-def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
+def S2MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
   
   # Filter the S2 harmonized collection by date and bounds.
   S2_tilelist = stateS2List(CONUSBoundary)
@@ -105,13 +106,13 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
   remap_target = RemapTable.resetValueList()
 
   # classification for each single tile
-  for i in range(numList):#[1]:#
+  for i in range(numList):#range(1):#
     tile = S2_tilelist[i]
     print(i, tile)
 
     try:
         # This step usually does not trigger computation; it's lazy
-        classified_dictionary = ee.Dictionary(imgS2Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel))
+        classified_dictionary = ee.Dictionary(imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel))
         
         # This line triggers a server-side computation (potential failure point)
         try:
@@ -137,7 +138,7 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
                 )
                 task.start()
                 taskList.append(task)
-                print(f"Export task '{description}' started. Check Google Drive {tileFolder} folder.")
+                print(f"Export task '{description}' started.")
             except Exception as e:
                 print(f"[SKIPPED] Error setting up export for tile {tile}: {e}")
                 continue
@@ -151,19 +152,24 @@ def S2MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary,
 
   # waiting for uploading finish
   try:
-    # Function to monitor task completion
-    def wait_for_tasks(tasks):
-        print("Waiting for all export tasks to complete...")
-        while True:
-            statuses = [task.status()['state'] for task in tasks]
-            if all(state in ['COMPLETED', 'FAILED', 'CANCELLED'] for state in statuses):
-                print(statuses)  # Optional: track task progress
-                break
-            # time.sleep(60)  # Wait 60 seconds before checking again
+    # Monitor tasks individually
+    def wait_for_tasks(taskList):
+      completed_tasks = set() 
+      while len(completed_tasks) < len(taskList):
+        for i, task in enumerate(taskList):
+          if i in completed_tasks:
+              continue
+          status = task.status()
+          task_name = status['description']
+          state = status['state']
+          if state in ['COMPLETED', 'FAILED', 'CANCELLED']:
+            print(f"Task '{task_name}' finished with state: {state}.")
+            completed_tasks.add(i)
+        time.sleep(30)  # Avoid spamming Earth Engine with too many requests
 
     # Call the monitoring function
     wait_for_tasks(taskList)
-    print("Sentinel-2 dataset classification done.")
+    print(f"Sentinel-2 dataset classification done. Check Google Drive {tileFolder} folder.")
   except:
     print("Something wrong during classification task conducting")
 
