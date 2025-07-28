@@ -7,12 +7,13 @@ import RemapTable
 from datetime import datetime
 
 # single L89 tile classification
-def imgL89Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel):
+def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
   # single tile path and row number
   # L89_single = ee.List(tile)
   path = tile[0] #L89_single.get(0)
   row = tile[1] #L89_single.get(1)
 
+  endDate = datetime.now().strftime('%Y-%m-%d')
   # image selection
   bands = ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'NDVI', 'NDWI']
   L8 = (ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
@@ -110,7 +111,7 @@ def L89List(CONUSBoundary):
   return L89_pathrowlist
 
 # Function - L89 mosaic classification
-def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
+def L89MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
  
   # Filter the L89 harmonized collection by date and bounds.
   pathrowlist = L89List(CONUSBoundary)
@@ -122,13 +123,13 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
   remap_target = RemapTable.resetValueList()
   
   # classification for each single tile
-  for i in range(numList):#[1]:#
+  for i in range(numList):#range(1):#
     tile = pathrowlist[i]
     print(i, tile)
 
     try:
         # This step usually does not trigger computation; it's lazy
-        classified_dictionary = ee.Dictionary(imgL89Classified(tile, startDate, endDate, cloudCover, CONUStrainingLabel))
+        classified_dictionary = ee.Dictionary(imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel))
         
         # This line triggers a server-side computation (potential failure point)
         try:
@@ -154,7 +155,7 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
                 )
                 task.start()
                 taskList.append(task)
-                print(f"Export task '{description}' started. Check Google Drive {tileFolder} folder.")
+                print(f"Export task '{description}' started.")
             except Exception as e:
                 print(f"[SKIPPED] Error setting up export for tile {tile}: {e}")
                 continue
@@ -167,20 +168,24 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
 
   # waiting for uploading finish
   try:
-    # Function to monitor task completion
-    def wait_for_tasks(tasks):
-        print("Waiting for all export tasks to complete...")
-        while True:
-            statuses = [task.status()['state'] for task in tasks]
-            # print(statuses)  # Optional: track task progress
-            if all(state in ['COMPLETED', 'FAILED', 'CANCELLED'] for state in statuses):
-                print(statuses)  # Optional: track task progress  
-                break
-            # time.sleep(60)  # Wait 60 seconds before checking again
+    # Monitor tasks individually
+    def wait_for_tasks(taskList):
+      completed_tasks = set() 
+      while len(completed_tasks) < len(taskList):
+        for i, task in enumerate(taskList):
+          if i in completed_tasks:
+              continue
+          status = task.status()
+          task_name = status['description']
+          state = status['state']
+          if state in ['COMPLETED', 'FAILED', 'CANCELLED']:
+            print(f"Task '{task_name}' finished with state: {state}")
+            completed_tasks.add(i)
+        time.sleep(30)  # Avoid spamming Earth Engine with too many requests
 
     # Call the monitoring function
     wait_for_tasks(taskList)
-    print("Landsad 8/9 dataset classification done.")
+    print(f"Landsad 8/9 dataset classification done. Check Google Drive {tileFolder} folder.")
   except:
     print("Something wrong during classification task conducting")
 
@@ -202,5 +207,3 @@ def L89MosaicClassification(startDate, endDate, month, cloudCover, CONUSBoundary
     MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
   except:
     print("Something wrong in multi-image mosaic")
-
-

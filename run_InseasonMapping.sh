@@ -1,5 +1,13 @@
 #!/bin/bash
-echo "[Cron Triggered] $(date)" >> /home/hli47/logs/AutoInseasonMapping.log
+
+# Generate a timestamp (e.g., 2025-07-15)
+today=$(date '+%Y-%m-%d')
+
+# Define the log file path using that date
+log_file="/home/hli47/logs/AutoInseasonMapping_${today}.log"
+
+# Write the trigger time into the new log file
+echo "[Cron Triggered] $(date '+%Y-%m-%d %H:%M:%S')" >> "$log_file"
 
 # Activate conda and run your program
 # Load Conda (needed for non-login shells like cron)

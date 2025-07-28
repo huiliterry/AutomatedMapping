@@ -37,8 +37,8 @@ def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
         f"COMPRESS={compression}",
         "BIGTIFF=YES",
         "NUM_THREADS=ALL_CPUS",
-        "BLOCKSIZE=1024",
-        "OPTIMIZE_SIZE=TRUE"
+        "BLOCKSIZE=1024"#,
+        # "OPTIMIZE_SIZE=TRUE"
     ]
     # Setup warp
     warp_options = gdal.WarpOptions(
