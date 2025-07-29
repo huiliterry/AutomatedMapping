@@ -49,7 +49,7 @@ def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
     tileTrainingLabel = CONUStrainingLabel.clip(tileGeometry)
     # training samples generation by stratified sampling method
     trainingSample = tileImage.addBands(tileTrainingLabel).stratifiedSample(
-      numPoints = 1500,
+      numPoints = 1300,
       classBand= 'cropland',
       region= tileGeometry,
       scale= 10
