@@ -17,4 +17,4 @@ source /home/hli47/anaconda3/etc/profile.d/conda.sh
 conda activate AutomatedMapping
 
 # Run the script with full Python path
-/home/hli47/anaconda3/envs/AutomatedMapping/bin/python3.13 /home/hli47/InseasonMapping/Code/AutoInseasonMapping.py >> /home/hli47/logs/AutoInseasonMapping.log 2>&1
+/home/hli47/anaconda3/envs/AutomatedMapping/bin/python3.13 /home/hli47/InseasonMapping/Code/AutoInseasonMapping.py >> "$log_file" 2>&1
