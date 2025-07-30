@@ -38,14 +38,14 @@ def imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel):
     tileTrainingLabel = CONUStrainingLabel.clip(tileGeometry)
     # training samples generation by stratified sampling method
     trainingSample = tileImage.addBands(tileTrainingLabel).stratifiedSample(
-      numPoints = 1000,
+      numPoints = 1500,
       classBand= 'cropland',
       region= tileGeometry,
       scale= 10
     )
 
     def couldClassified():
-      classified = (tileImage.classify(ee.Classifier.smileRandomForest(50).train(
+      classified = (tileImage.classify(ee.Classifier.smileRandomForest(30).train(
                                       features= trainingSample,
                                       classProperty= 'cropland',
                                       inputProperties= tileImage.bandNames()
