@@ -52,7 +52,7 @@ def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
       numPoints = 1000,
       classBand= 'cropland',
       region= tileGeometry,
-      scale= 10
+      scale= 30
     )
 
     def couldClassified():
