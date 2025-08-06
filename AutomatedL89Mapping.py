@@ -56,7 +56,7 @@ def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
     )
 
     def couldClassified():
-      classified = (tileImage.classify(ee.Classifier.smileRandomForest(50).train(
+      classified = (tileImage.classify(ee.Classifier.smileRandomForest(20).train(
                                       features= trainingSample,
                                       classProperty= 'cropland',
                                       inputProperties= tileImage.bandNames()

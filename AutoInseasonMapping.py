@@ -56,15 +56,17 @@ print("startDate:month", startDate,month)
 
 # year, startDate, endDate, month = 2025, "2025-05-01","2025-07-17", "July"
 
-S2cloudCover = 15
-L89cloudCover = 20 
+S2cloudCover = 10
+L89cloudCover = 15 
 CONUStrainingLabel = TrustedPixel.trustedPixels(year,7)
 
 root_path = '/content/drive/MyDrive/'
 L89tileFolder = 'AutoInseasonL89_Mapping'
 S2tileFolder = 'AutoInseasonS2_Mapping'
 local_root_folder = '/home/hli47/InseasonMapping/Results/'
-mosaicfolder_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Result/'
+# mosaicfolder_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Result/'
+mosaicfolder_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Mosaic/'
+result_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Result/'
 
 l89_name = f"{month}{year}_L89mosaic.tif"
 s2_name = f"{month}{year}_S2mosaic.tif"
@@ -111,8 +113,7 @@ if __name__ == '__main__':
     shapefile = "/home/hli47/InseasonMapping/ShapeFile/CONUS_boundary_5070.shp"
 
     mosaicedFilePath_10m = mosaicfolder_path +  mosaic_name_10m
-    clippedFilePath_10m = mosaicfolder_path +  clip_name_10m
-    output_erdas_path_10m = mosaicfolder_path + erdas_name_10m
+
     # Mosaic S2 and Landsat8/9 mosaiced image
     try:
         print('Ready to mosaic 10m L89mosaic and S2mosaic')
@@ -122,6 +123,8 @@ if __name__ == '__main__':
 
 
     # # clip mosaiced image by using CONUS shape file, output COG with color tabel
+    clippedFilePath_10m = result_path +  clip_name_10m
+    output_erdas_path_10m = result_path + erdas_name_10m
     try:
         print('Ready to clip 10m raster by CONUS shp_file')
         ClipRasterByShp.clip_raster_to_cog(mosaicedFilePath_10m, shapefile, clippedFilePath_10m)
@@ -139,12 +142,12 @@ if __name__ == '__main__':
     # pre-set file's name and path for 30m
     resample30mCOG_name = f'{month}{year}CropMap30m.tif'
     erdas_name30m = f'{month}{year}CropMap30m.img'
-    resample30mCOG_path = mosaicfolder_path + resample30mCOG_name
-    output_erdas_path30m = mosaicfolder_path + erdas_name30m
+    resample30mCOG_path = result_path + resample30mCOG_name
+    output_erdas_path30m = result_path + erdas_name30m
 
     # resample 10m COG to 30m COG, output COG with color tabel
     try:
-        print('Ready to resample 10m COG raster to 10m')
+        print('Ready to resample 10m COG raster to 30m')
         ResampleTool.resample(clippedFilePath_10m,resample30mCOG_path,'COG',30)
     except Exception as e:
         print(f"Add color failed: {e}")
@@ -158,41 +161,43 @@ if __name__ == '__main__':
 
 
     # ===========Delete mosaiced files==============
-    l89_path = mosaicfolder_path + l89_name
-    s2_path = mosaicfolder_path + s2_name
+    # l89_path = mosaicfolder_path + l89_name
+    # s2_path = mosaicfolder_path + s2_name
 
-    # delete l89 mosaic image
-    try:
-        if os.path.exists(l89_path):
-            os.remove(l89_path)
-    except PermissionError:
-        print(f"Warning: Could not delete {l89_path} due to permission error.")
+    # # delete l89 mosaic image
+    # try:
+    #     if os.path.exists(l89_path):
+    #         os.remove(l89_path)
+    # except PermissionError:
+    #     print(f"Warning: Could not delete {l89_path} due to permission error.")
 
-    # delete s2 mosaic image
-    try:
-        if os.path.exists(s2_path):
-            os.remove(s2_path)
-    except PermissionError:
-        print(f"Warning: Could not delete {s2_path} due to permission error.")
+    # # delete s2 mosaic image
+    # try:
+    #     if os.path.exists(s2_path):
+    #         os.remove(s2_path)
+    # except PermissionError:
+    #     print(f"Warning: Could not delete {s2_path} due to permission error.")
         
-    # delete l89+s2 mosaic image       
-    try:
-        if os.path.exists(mosaicedFilePath_10m):
-            os.remove(mosaicedFilePath_10m)
-    except PermissionError:
-        print(f"Warning: Could not delete {mosaicedFilePath_10m} due to permission error.")
+    # # delete l89+s2 mosaic image       
+    # try:
+    #     if os.path.exists(mosaicedFilePath_10m):
+    #         os.remove(mosaicedFilePath_10m)
+    # except PermissionError:
+    #     print(f"Warning: Could not delete {mosaicedFilePath_10m} due to permission error.")
 
     # delete folder of download classification  
     L89tilePath = local_root_folder + L89tileFolder
     S2tilePath = local_root_folder + S2tileFolder
-    print('L89tilePath,S2tilePath', L89tilePath,S2tilePath)  
+    print('L89tilePath,S2tilePath,mosaicfolder_path', L89tilePath,S2tilePath,mosaicfolder_path)  
     try:
         if os.path.exists(L89tilePath):
             shutil.rmtree(L89tilePath)
         if os.path.exists(S2tilePath):
             shutil.rmtree(S2tilePath)
+        if os.path.exists(mosaicfolder_path):
+            shutil.rmtree(mosaicfolder_path)
     except PermissionError:
-        print(f"Warning: Could not delete {L89tilePath} or{S2tilePath} due to permission error.")
+        print(f"Warning: Could not delete {L89tilePath} or {S2tilePath} or {mosaicfolder_path} due to permission error.")
 
 
     # ===========Delete classification images from Google Drive==============
@@ -200,7 +205,7 @@ if __name__ == '__main__':
     print("Ready to delete files in Drive folder")
     DeleteDriveFiles.delete_drive_files(L89tileFolder)
     DeleteDriveFiles.delete_drive_files(S2tileFolder)
-    print(f'All in-season maps in {month} have been produced, please access data via path: {mosaicfolder_path}')
+    print(f'All in-season maps in {month} have been produced, please access data via path: {result_path}')
 
     # calculate and return elapsed time at the end of script running
     end_time = datetime.now()
