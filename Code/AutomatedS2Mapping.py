@@ -9,6 +9,21 @@ from datetime import datetime
 
 # single S2 tile classification
 def imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel):
+  """
+    Classify a single Sentinel-2 tile time-series image using Random Forest.
+
+    Args:
+        tile (str): Sentinel-2 MGRS tile identifier.
+        startDate (str): Start date for filtering images (YYYY-MM-DD).
+        cloudCover (float): Maximum cloud cover percentage allowed.
+        CONUStrainingLabel (ee.Image): Training label image for classification.
+
+    Returns:
+        ee.Dictionary: Dictionary containing:
+            - 'image' (ee.Image or str): Classified image or 'null' if unavailable.
+            - 'description' (str): Description string for the tile classification.
+            - 'region' (ee.Geometry or str): Tile geometry or 'null'.
+    """
   # define current data as enddate
   endDate = datetime.now().strftime('%Y-%m-%d')
 
@@ -84,6 +99,15 @@ def imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel):
 
 # extract all sentinel-2 tile covering CONUS into a list
 def stateS2List(CONUSBoundary):
+  """
+    Retrieve a list of unique Sentinel-2 MGRS tiles covering the CONUS boundary in a fixed date range.
+
+    Args:
+        CONUSBoundary (ee.Geometry): Geometry defining the CONUS boundary.
+
+    Returns:
+        list: List of Sentinel-2 MGRS tile identifiers (strings).
+    """
   # Filter the S2 harmonized collection by date and bounds.
   S2_tilelist = (ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                               .filterDate("2025-05-01", "2025-05-15")
@@ -95,7 +119,23 @@ def stateS2List(CONUSBoundary):
 
 # conduct all classifications, exports, downloads, and mosaics
 def S2MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
-  
+  """
+    Run classification on all Sentinel-2 tiles covering CONUS, export results, download, and mosaic.
+
+    Args:
+        startDate (str): Start date for filtering images (YYYY-MM-DD).
+        month (str): Month label used in output filenames.
+        cloudCover (float): Maximum cloud cover percentage allowed.
+        CONUSBoundary (ee.Geometry): Geometry defining CONUS boundary.
+        CONUStrainingLabel (ee.Image): Training label image for classification.
+        tileFolder (str): Google Drive folder name for exporting images.
+        local_root_folder (str): Local folder path for downloading images.
+        mosaicFolder (str): Local folder path for mosaicking output.
+        file_name (str): Output filename for the mosaic image.
+
+    Returns:
+        None
+    """
   # Filter the S2 harmonized collection by date and bounds.
   S2_tilelist = stateS2List(CONUSBoundary)
   numList = len(S2_tilelist)

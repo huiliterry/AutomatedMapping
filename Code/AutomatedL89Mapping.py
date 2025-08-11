@@ -8,6 +8,21 @@ from datetime import datetime
 
 # single L89 tile time-series classification
 def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
+  """
+    Classify a single Landsat 8/9 tile time-series image using Random Forest.
+
+    Parameters:
+        tile (list or tuple): Landsat WRS tile coordinates [path, row].
+        startDate (str): Start date for filtering images (YYYY-MM-DD).
+        cloudCover (float): Maximum cloud cover percentage allowed.
+        CONUStrainingLabel (ee.Image): Training label image for classification.
+
+    Returns:
+        ee.Dictionary: Dictionary containing:
+            - 'image': Classified ee.Image or 'null' if classification not possible.
+            - 'description': String describing the tile classification.
+            - 'region': ee.Geometry of the tile or 'null'.
+    """
   # single tile path and row number
   path = tile[0] 
   row = tile[1] 
@@ -96,6 +111,15 @@ def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
 
 # extract all L89 tile covering CONUS into a list
 def L89List(CONUSBoundary):
+  """
+    Extract a list of unique Landsat 8/9 tile coordinates covering CONUS within a date range.
+
+    Parameters:
+        CONUSBoundary (ee.Geometry): Geometry polygon for CONUS boundary.
+
+    Returns:
+        list: List of unique [path, row] tile pairs.
+    """
   # Filter the L89 harmonized collection by date and bounds.
   L8 = (ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
                     .filterDate("2025-05-01","2025-05-20")
@@ -114,7 +138,23 @@ def L89List(CONUSBoundary):
 
 # conduct all classifications, exports, downloads, and mosaics
 def L89MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
- 
+  """
+    Run classification on all Landsat 8/9 tiles covering CONUS, export results, download, and mosaic.
+
+    Parameters:
+        startDate (str): Start date for filtering images (YYYY-MM-DD).
+        month (str): Month label for output file naming.
+        cloudCover (float): Maximum cloud cover percentage allowed.
+        CONUSBoundary (ee.Geometry): Geometry polygon for CONUS boundary.
+        CONUStrainingLabel (ee.Image): Training label image for classification.
+        tileFolder (str): Google Drive folder name for exporting images.
+        local_root_folder (str): Local folder path to download images.
+        mosaicFolder (str): Local folder path for mosaicking output.
+        file_name (str): Output filename for mosaic image.
+
+    Returns:
+        None
+    """
   # Filter the L89 harmonized collection by date and bounds.
   pathrowlist = L89List(CONUSBoundary)
   numList = len(pathrowlist)
