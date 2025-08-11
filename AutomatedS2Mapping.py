@@ -9,8 +9,10 @@ from datetime import datetime
 
 # single S2 tile classification
 def imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel):
-  # image selection
+  # define current data as enddate
   endDate = datetime.now().strftime('%Y-%m-%d')
+
+  # image selection by startDate,endDate, path, row, and cloud cover
   bands = ['B2', 'B3', 'B4', 'B8', 'B11', 'B12', 'NDVI', 'NDWI']
   S2  = (ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                         .filter(ee.Filter.eq('MGRS_TILE', tile))
@@ -26,11 +28,14 @@ def imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel):
   tileImage = S2.toBands()
   # extract tile geometry
   tileGeometry = tileImage.geometry()
-  # display(tileGeometry)
-  # bools = ee.Number(tileGeometry.area(1)).eq(0)
-  # display(bools)
 
+  # define decription of this tile's classification
   output_description = str(tile) + '_' + endDate
+
+  # return null image and description, if training sample is not availabel
+  def imgNull():
+    output_dictionary = ee.Dictionary({'image':'null', 'description':'null', 'region':'null'})
+    return output_dictionary
 
   # classification processing
   def imgClassified():
@@ -41,9 +46,11 @@ def imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel):
       numPoints = 1500,
       classBand= 'cropland',
       region= tileGeometry,
-      scale= 10
+      scale= 10 # matching to sentinel-2 spatial resolution
     )
 
+
+    # the real time-series classification and post processing, if training sample is availabel
     def couldClassified():
       classified = (tileImage.classify(ee.Classifier.smileRandomForest(20).train(
                                       features= trainingSample,
@@ -55,34 +62,27 @@ def imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel):
                       .set('type','classification')
                       .toUint8()
               )
+      
+      # remove noise by using majorty filter       
       majority_filtered = classified.focal_mode(
         radius=1, # radius in pixels (1 = 3x3 window)
         units='pixels',
         kernelType='square',
         iterations=1
       )
+
+      # define a dictionary to stroe classified image and its matedata
       output_dictionary = ee.Dictionary({'image':majority_filtered, 'description':output_description, 'region':tileGeometry})
       return output_dictionary
 
-    def couldNotClassified():
-      # nullImg = ee.Image(0).clip(tileGeometry).set('type','null')
-      output_dictionary = ee.Dictionary({'image':'null', 'description':'null', 'region':'null'})
-      return output_dictionary
+    # conduct classification by judging the training sample's count
+    return ee.Algorithms.If(trainingSample.size().neq(0).And(trainingSample.aggregate_count_distinct("cropland").neq(1)),couldClassified(),imgNull())
 
 
-    return ee.Algorithms.If(trainingSample.size().neq(0).And(trainingSample.aggregate_count_distinct("cropland").neq(1)),couldClassified(),couldNotClassified())
-
-  # alternative null image process
-  def imgNull():
-    # nullImg = ee.Image(0).set('type','null') #.clip(tileGeometry)
-    output_dictionary = ee.Dictionary({'image':'null', 'description':'null', 'region':'null'})
-    return output_dictionary
-
-  # output classified crop map
-
+  # conduct classification and return result if the tileGeometry area is not 0
   return ee.Algorithms.If(ee.Number(tileGeometry.area(1)).neq(0),imgClassified(),imgNull())
 
-# Function - S2 tile list
+# extract all sentinel-2 tile covering CONUS into a list
 def stateS2List(CONUSBoundary):
   # Filter the S2 harmonized collection by date and bounds.
   S2_tilelist = (ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
@@ -93,7 +93,7 @@ def stateS2List(CONUSBoundary):
                               .getInfo())
   return S2_tilelist
 
-# Function - S2 mosaic classification
+# conduct all classifications, exports, downloads, and mosaics
 def S2MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
   
   # Filter the S2 harmonized collection by date and bounds.
@@ -111,7 +111,7 @@ def S2MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStra
     print(i, tile)
 
     try:
-        # This step usually does not trigger computation; it's lazy
+        # This step usually does not trigger computation
         classified_dictionary = ee.Dictionary(imgS2Classified(tile, startDate, cloudCover, CONUStrainingLabel))
         
         # This line triggers a server-side computation (potential failure point)
@@ -123,10 +123,12 @@ def S2MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStra
 
         if imgID and imgID != 'null':
             try:
+                # extract classified image, geometry region, and description
                 classified = ee.Image(classified_dictionary.get('image')).remap(remap_original, remap_target)
                 region = ee.Geometry(classified_dictionary.get('region'))
                 description = month + '_' + imgID
 
+                # export classification to Drive
                 task = ee.batch.Export.image.toDrive(
                     image=classified,
                     description=description,
@@ -165,7 +167,8 @@ def S2MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStra
           if state in ['COMPLETED', 'FAILED', 'CANCELLED']:
             print(f"Task '{task_name}' finished with state: {state}.")
             completed_tasks.add(i)
-        time.sleep(30)  # Avoid spamming Earth Engine with too many requests
+        # Avoid spamming Earth Engine with too many requests
+        time.sleep(30)  
 
     # Call the monitoring function
     wait_for_tasks(taskList)
@@ -176,7 +179,8 @@ def S2MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStra
   
   # download all classified images when finishing upload  
   try:
-    time.sleep(30) # Wait for 30 seconds before checking again
+    # Wait for 30 seconds before checking again
+    time.sleep(30) 
     print("Ready to download")
     DownloadTool.downloadfiles_byserviceaccout(tileFolder, local_root_folder)
   except:

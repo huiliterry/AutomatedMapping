@@ -6,11 +6,39 @@ gdal.UseExceptions()
 
 def convert_tiff_to_erdas(input_tiff_path, output_erdas_path):
     """
-    Converts a TIFF image to ERDAS Imagine (.img) format.
+    Convert a GeoTIFF file to ERDAS Imagine (.img) format.
 
-    Args:
-        input_tiff_path (str): Path to the input TIFF file.
-        output_erdas_path (str): Path for the output ERDAS Imagine file.
+    This function uses GDAL to read a TIFF raster dataset and write it to
+    ERDAS Imagine format using the HFA driver, with optional compression.
+
+    Parameters
+    ----------
+    input_tiff_path : str
+        Path to the input GeoTIFF file.
+    output_erdas_path : str
+        Path where the output ERDAS Imagine (.img) file will be saved.
+
+    Notes
+    -----
+    - Uses the GDAL "HFA" driver for ERDAS Imagine format.
+    - Copies all georeferencing, metadata, and raster bands from the source.
+    - Applies compression to the output file (`COMPRESS=YES`).
+    - Sets the GDAL cache size to 5 GB for potentially faster processing.
+
+    Raises
+    ------
+    RuntimeError
+        If the input file cannot be opened or the HFA driver is not found.
+    Exception
+        If any other GDAL or file I/O error occurs during conversion.
+
+    Example
+    -------
+    >>> convert_tiff_to_erdas(
+    ...     "input_satellite.tif",
+    ...     "output_imagery.img"
+    ... )
+    Conversion successful: input_satellite.tif converted to output_imagery.img
     """
     try:
         # Set GDAL cache to 5 GB

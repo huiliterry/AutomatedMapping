@@ -6,6 +6,58 @@ gdal.UseExceptions()
 
 # Function - S2 mosaic
 def mosaicoutputVRT(inputfolder_path,outputfolder_path,file_name):
+    """
+    Mosaics multiple GeoTIFF files from a specified input folder into a single GeoTIFF.
+
+    This function scans a given input folder for all `.tif` files, builds a 
+    temporary Virtual Raster Tile (VRT) to mosaic them, and then translates 
+    the VRT into a compressed, tiled GeoTIFF. The resulting mosaic is saved 
+    in the specified output folder with the given file name.
+
+    Parameters
+    ----------
+    inputfolder_path : str
+        Path to the folder containing the input `.tif` files to be mosaicked.
+    outputfolder_path : str
+        Path to the folder where the final mosaic GeoTIFF will be saved. 
+        The folder will be created if it does not exist.
+    file_name : str
+        Name of the output GeoTIFF file (including `.tif` extension).
+
+    Processing Steps
+    ----------------
+    1. Search the `inputfolder_path` for all `.tif` files.
+    2. Build a temporary `.vrt` mosaic using `gdal.BuildVRT` with `srcNodata=0`.
+    3. Translate the `.vrt` to a GeoTIFF with:
+       - LZW compression
+       - Internal tiling
+       - BigTIFF support
+       - Multi-threaded processing
+    4. Save the mosaic to `outputfolder_path` under the provided `file_name`.
+    5. Remove the temporary `.vrt` file after processing.
+
+    Notes
+    -----
+    - NoData values are set to `0` for both source and output.
+    - This function uses all available CPU threads for faster translation.
+    - Suitable for mosaicking large raster datasets.
+
+    Example
+    -------
+    >>> mosaicoutputVRT(
+    ...     inputfolder_path="/path/to/input_tifs",
+    ...     outputfolder_path="/path/to/output",
+    ...     file_name="final_mosaic.tif"
+    ... )
+    Found 10 files for mosaicking.
+    Mosaic written to: /path/to/output/final_mosaic.tif
+
+    Dependencies
+    ------------
+    - GDAL (Python bindings)
+    - glob
+    - os
+    """
     # Build full folder path
     tif_files = glob.glob(os.path.join(inputfolder_path, '*.tif'))
     print(f"Found {len(tif_files)} files for mosaicking.")

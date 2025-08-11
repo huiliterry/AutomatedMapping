@@ -6,15 +6,16 @@ import MosaicMultiImg
 import RemapTable
 from datetime import datetime
 
-# single L89 tile classification
+# single L89 tile time-series classification
 def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
   # single tile path and row number
-  # L89_single = ee.List(tile)
-  path = tile[0] #L89_single.get(0)
-  row = tile[1] #L89_single.get(1)
+  path = tile[0] 
+  row = tile[1] 
 
+  # define current data as enddate
   endDate = datetime.now().strftime('%Y-%m-%d')
-  # image selection
+
+  # image selection by startDate,endDate, path, row, and cloud cover
   bands = ['SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7', 'NDVI', 'NDWI']
   L8 = (ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
                   .filterDate(startDate,endDate)
@@ -28,20 +29,24 @@ def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
                   .filter(ee.Filter.eq('WRS_ROW',row))
                   .filter(ee.Filter.lt('CLOUD_COVER_LAND',cloudCover)))
 
+  # incorporate landsat 8 and landsat 9 into one collection sorted by time, and add NDVI and NDWI bands to each single image
   L89 = (ee.ImageCollection(L8.merge(L9)).sort('system:time_start')
                                         .map(lambda image: image.addBands(image.normalizedDifference(['SR_B5','SR_B4']).rename('NDVI'))
                                                                 .addBands(image.normalizedDifference(['SR_B3','SR_B5']).rename('NDWI')))
                                         .select(bands))
 
-  # convert ImageCollection to single Image
+  # convert time-series ImageCollection to single Image
   tileImage = L89.toBands()
   # extract tile geometry
   tileGeometry = tileImage.geometry()
-  # display(tileGeometry)
-  # bools = ee.Number(tileGeometry.area(1)).eq(0)
-  # display(bools)
 
+  # define decription of this tile's classification
   output_description = str(path) + '_' + str(row) + '_' + endDate
+  
+  # return null image and description, if training sample is not availabel
+  def imgNull():
+    output_dictionary = ee.Dictionary({'image':'null', 'description':'null', 'region':'null'})
+    return output_dictionary
 
   # classification processing
   def imgClassified():
@@ -52,10 +57,13 @@ def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
       numPoints = 1000,
       classBand= 'cropland',
       region= tileGeometry,
-      scale= 30
+      scale= 30 # matching to landsat spatial resolution
     )
 
+
+    # the real time-series classification and post processing, if training sample is availabel
     def couldClassified():
+      # time-series classification
       classified = (tileImage.classify(ee.Classifier.smileRandomForest(20).train(
                                       features= trainingSample,
                                       classProperty= 'cropland',
@@ -66,34 +74,27 @@ def imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel):
                       .set('type','classification')
                       .toUint8()
               )
+      
+      # remove noise by using majorty filter 
       majority_filtered = classified.focal_mode(
           radius=1, # radius in pixels (1 = 3x3 window)
           units='pixels',
           kernelType='square',
           iterations=1
       )
+
+      # define a dictionary to stroe classified image and its matedata
       output_dictionary = ee.Dictionary({'image':majority_filtered, 'description':output_description, 'region':tileGeometry})
       return output_dictionary
 
-    def couldNotClassified():
-      # nullImg = ee.Image(0).clip(tileGeometry).set('type','null')
-      output_dictionary = ee.Dictionary({'image':'null', 'description':'null', 'region':'null'})
-      return output_dictionary
+    # conduct classification by judging the training sample's count
+    return ee.Algorithms.If(trainingSample.size().neq(0).And(trainingSample.aggregate_count_distinct("cropland").neq(1)),couldClassified(),imgNull())
 
-
-    return ee.Algorithms.If(trainingSample.size().neq(0).And(trainingSample.aggregate_count_distinct("cropland").neq(1)),couldClassified(),couldNotClassified())
-
-  # alternative null image process
-  def imgNull():
-    # nullImg = ee.Image(0).set('type','null') #.clip(tileGeometry)
-    output_dictionary = ee.Dictionary({'image':'null', 'description':'null', 'region':'null'})
-    return output_dictionary
-
-  # output classified crop map
-
+  # conduct classification and return result if the tileGeometry area is not 0
   return ee.Algorithms.If(ee.Number(tileGeometry.area(1)).neq(0),imgClassified(),imgNull())
 
-# Function - L89 tile list
+
+# extract all L89 tile covering CONUS into a list
 def L89List(CONUSBoundary):
   # Filter the L89 harmonized collection by date and bounds.
   L8 = (ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
@@ -110,7 +111,8 @@ def L89List(CONUSBoundary):
   L89_pathrowlist = ee.Array.cat([pathString, rowString], 1).toList().distinct().getInfo()
   return L89_pathrowlist
 
-# Function - L89 mosaic classification
+
+# conduct all classifications, exports, downloads, and mosaics
 def L89MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStrainingLabel, tileFolder, local_root_folder, mosaicFolder,file_name):
  
   # Filter the L89 harmonized collection by date and bounds.
@@ -128,7 +130,7 @@ def L89MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStr
     print(i, tile)
 
     try:
-        # This step usually does not trigger computation; it's lazy
+        # This step usually does not trigger computation
         classified_dictionary = ee.Dictionary(imgL89Classified(tile, startDate, cloudCover, CONUStrainingLabel))
         
         # This line triggers a server-side computation (potential failure point)
@@ -140,10 +142,12 @@ def L89MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStr
 
         if imgID and imgID != 'null':
             try:
+                # extract classified image, geometry region, and description
                 classified = ee.Image(classified_dictionary.get('image')).remap(remap_original, remap_target)
                 region = ee.Geometry(classified_dictionary.get('region'))
                 description = month + '_' + imgID
 
+                # export classification to Drive
                 task = ee.batch.Export.image.toDrive(
                     image=classified,
                     description=description,
@@ -181,7 +185,8 @@ def L89MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStr
           if state in ['COMPLETED', 'FAILED', 'CANCELLED']:
             print(f"Task '{task_name}' finished with state: {state}")
             completed_tasks.add(i)
-        time.sleep(30)  # Avoid spamming Earth Engine with too many requests
+        # Avoid spamming Earth Engine with too many requests
+        time.sleep(30)  
 
     # Call the monitoring function
     wait_for_tasks(taskList)
@@ -192,7 +197,8 @@ def L89MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStr
   
   # download all classified images when finishing upload  
   try:
-    time.sleep(30) # Wait for 30 seconds before checking again
+    # Wait for 30 seconds before downloading 
+    time.sleep(30) 
     print("Ready to download")
     DownloadTool.downloadfiles_byserviceaccout(tileFolder, local_root_folder)
   except:
@@ -201,7 +207,8 @@ def L89MosaicClassification(startDate, month, cloudCover, CONUSBoundary, CONUStr
 
   # mosaic all classified images when finishing download
   try:
-    time.sleep(30) # Wait for 30 seconds before checking again
+    # Wait for 30 seconds before mosaic 
+    time.sleep(30) 
     print("Ready to mosaic multiple L89 classifications")
     sourceFolder = os.path.join(local_root_folder, tileFolder)
     MosaicMultiImg.mosaicoutputVRT(sourceFolder, mosaicFolder, file_name)
