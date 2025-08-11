@@ -48,8 +48,8 @@ Example:
 $ python inseason_crop_mapping.py
 
 Output:
-- Mosaic, clipped, and resampled crop classification maps in both COG and Erdas IMG formats
-  saved under the Results folder.
+- Mosaic, clipped, and resampled classification maps in both COG formats saved under the Results folder.
+- Covert Erdas image from COG
 - Temporary files and Google Drive export folders cleaned up after processing.
 """
 
