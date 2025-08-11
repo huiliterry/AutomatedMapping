@@ -33,6 +33,7 @@ def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
             output_cog_path="output/clipped_cog.tif"
         )
     """
+    
     gdal.UseExceptions()
     # Set GDAL cache to 5 GB
     gdal.SetCacheMax(5120 * 1024 * 1024)  # 5120 MB = 5 GB

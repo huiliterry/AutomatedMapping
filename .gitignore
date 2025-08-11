@@ -3,7 +3,6 @@
 *.xlsx
 *.code-workspace
 __pycache__/
-Post_processing/
 *.py[cod]
 *.pyo
 *.pyd
