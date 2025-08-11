@@ -99,17 +99,73 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="AutomatedS2Mapping.S2MosaicClassification">
 <span class="sig-prename descclassname"><span class="pre">AutomatedS2Mapping.</span></span><span class="sig-name descname"><span class="pre">S2MosaicClassification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startDate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">month</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloudCover</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CONUSBoundary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CONUStrainingLabel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tileFolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_root_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mosaicFolder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AutomatedS2Mapping.S2MosaicClassification" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Run classification on all Sentinel-2 tiles covering CONUS, export results, download, and mosaic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>startDate</strong> (<em>str</em>) – Start date for filtering images (YYYY-MM-DD).</p></li>
+<li><p><strong>month</strong> (<em>str</em>) – Month label used in output filenames.</p></li>
+<li><p><strong>cloudCover</strong> (<em>float</em>) – Maximum cloud cover percentage allowed.</p></li>
+<li><p><strong>CONUSBoundary</strong> (<em>ee.Geometry</em>) – Geometry defining CONUS boundary.</p></li>
+<li><p><strong>CONUStrainingLabel</strong> (<em>ee.Image</em>) – Training label image for classification.</p></li>
+<li><p><strong>tileFolder</strong> (<em>str</em>) – Google Drive folder name for exporting images.</p></li>
+<li><p><strong>local_root_folder</strong> (<em>str</em>) – Local folder path for downloading images.</p></li>
+<li><p><strong>mosaicFolder</strong> (<em>str</em>) – Local folder path for mosaicking output.</p></li>
+<li><p><strong>file_name</strong> (<em>str</em>) – Output filename for the mosaic image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="AutomatedS2Mapping.imgS2Classified">
 <span class="sig-prename descclassname"><span class="pre">AutomatedS2Mapping.</span></span><span class="sig-name descname"><span class="pre">imgS2Classified</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startDate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloudCover</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CONUStrainingLabel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AutomatedS2Mapping.imgS2Classified" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Classify a single Sentinel-2 tile time-series image using Random Forest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tile</strong> (<em>str</em>) – Sentinel-2 MGRS tile identifier.</p></li>
+<li><p><strong>startDate</strong> (<em>str</em>) – Start date for filtering images (YYYY-MM-DD).</p></li>
+<li><p><strong>cloudCover</strong> (<em>float</em>) – Maximum cloud cover percentage allowed.</p></li>
+<li><p><strong>CONUStrainingLabel</strong> (<em>ee.Image</em>) – Training label image for classification.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Dictionary containing:</dt><dd><ul class="simple">
+<li><p>’image’ (ee.Image or str): Classified image or ‘null’ if unavailable.</p></li>
+<li><p>’description’ (str): Description string for the tile classification.</p></li>
+<li><p>’region’ (ee.Geometry or str): Tile geometry or ‘null’.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ee.Dictionary</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="AutomatedS2Mapping.stateS2List">
 <span class="sig-prename descclassname"><span class="pre">AutomatedS2Mapping.</span></span><span class="sig-name descname"><span class="pre">stateS2List</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">CONUSBoundary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AutomatedS2Mapping.stateS2List" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Retrieve a list of unique Sentinel-2 MGRS tiles covering the CONUS boundary in a fixed date range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>CONUSBoundary</strong> (<em>ee.Geometry</em>) – Geometry defining the CONUS boundary.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of Sentinel-2 MGRS tile identifiers (strings).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
