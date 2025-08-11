@@ -9,7 +9,6 @@ import DownloadTool
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
 
-
 # load credentials and token, return servive object
 def authenticate_drive():
     """
@@ -19,6 +18,14 @@ def authenticate_drive():
     If a saved token exists (`token.json`), it is used directly; otherwise,
     it launches a local browser flow to authenticate the user and store the
     token for future use.
+
+    ** Google Cloud setting and API install (important)
+    Set Up Google Drive API
+    - Go to: https://console.developers.google.com
+    - Enable Google Drive API
+    - Create OAuth 2.0 credentials and download the credentials.json file
+    Install Required Packages
+    - conda install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
     Returns
     -------

@@ -119,6 +119,46 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
     - The target Drive folder must be shared with the service account email.
     - Downloads are throttled by a `time.sleep(1)` delay to avoid API rate limits.
 
+    **Important - Before program 
+    Create a Google service account, download the JSON key, and share a Google Drive folder or file with the service account’s email
+    -----
+    - Create a Google Cloud Project (if you don’t have one)
+        Go to Google Cloud Console.
+        In the top bar, click the project dropdown, then click "New Project".
+        Enter a name (e.g., MyDriveAccess) and click Create.
+    - Enable the Google Drive API
+        Go to: Google Drive API
+        Make sure your project is selected.
+        Click "Enable".
+    - Create a Service Account
+        Go to the IAM & Admin → Service Accounts page:
+        https://console.cloud.google.com/iam-admin/serviceaccounts
+        Click “+ Create Service Account”.
+        Fill in:
+        Name: my-drive-access
+        ID: auto-generated
+        Description: e.g., Service account for Colab access
+        Click “Create and Continue”
+        Under Grant this service account access to project, you can skip roles (no need to assign Drive roles here). Click Continue → Done.
+    - Create and Download a JSON Key
+        After the service account is created, find it in the list.
+        Click the three dots on the right → “Manage Keys”.
+        Under “Keys”, click “Add Key” → “Create new key”.
+        Select JSON, then click Create.
+    - Copy the Service Account Email
+        On the service account page, copy the Email.
+        It looks like: my-drive-access@your-project-id.iam.gserviceaccount.com
+        Your browser will download a .json file. Save it securely — you’ll use this in your Python code.
+    - Share the Google Drive File or Folder with the Service Account
+        Go to Google Drive
+        Right-click the file or folder you want the service account to access.
+        Click “Share”
+        Paste the service account email into the share box.
+        Set access as Viewer (or Editor if needed).
+        Click Send.
+        Now the service account has access just like a regular user.
+    
+
     Example
     -------
     >>> downloadfiles_byserviceaccout("SatelliteImages", "/home/user/Downloads")
