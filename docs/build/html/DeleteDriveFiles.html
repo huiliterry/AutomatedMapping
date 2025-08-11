@@ -105,6 +105,13 @@
 If a saved token exists (<cite>token.json</cite>), it is used directly; otherwise,
 it launches a local browser flow to authenticate the user and store the
 token for future use.</p>
+<p>** Google Cloud setting and API install (important)
+Set Up Google Drive API
+- Go to: <a class="reference external" href="https://console.developers.google.com">https://console.developers.google.com</a>
+- Enable Google Drive API
+- Create OAuth 2.0 credentials and download the credentials.json file
+Install Required Packages
+- conda install –upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>An authenticated Google Drive API service object.</p>

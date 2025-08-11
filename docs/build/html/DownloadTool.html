@@ -122,6 +122,63 @@
 <li><p>The target Drive folder must be shared with the service account email.</p></li>
 <li><p>Downloads are throttled by a <cite>time.sleep(1)</cite> delay to avoid API rate limits.</p></li>
 </ul>
+<p><a href="#id1"><span class="problematic" id="id2">**</span></a>Important - Before program
+Create a Google service account, download the JSON key, and share a Google Drive folder or file with the service account’s email
+—–
+- Create a Google Cloud Project</p>
+<blockquote>
+<div><p>Go to Google Cloud Console.
+In the top bar, click the project dropdown, then click “New Project”.
+Enter a name (e.g., MyDriveAccess) and click Create.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Enable the Google Drive API</dt><dd><p>Go to: Google Drive API
+Make sure your project is selected.
+Click “Enable”.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Create a Service Account</dt><dd><p>Go to the IAM &amp; Admin, Service Accounts page:
+<a class="reference external" href="https://console.cloud.google.com/iam-admin/serviceaccounts">https://console.cloud.google.com/iam-admin/serviceaccounts</a>
+Click “+ Create Service Account”.
+Fill in:
+Name: my-drive-access
+ID: auto-generated
+Description: e.g., Service account for Colab access
+Click “Create and Continue”
+Under Grant this service account access to project, you can skip roles (no need to assign Drive roles here). Click Continue → Done.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Create and Download a JSON Key</dt><dd><p>After the service account is created, find it in the list.
+Click the three dots on the right → “Manage Keys”.
+Under “Keys”, click “Add Key” → “Create new key”.
+Select JSON, then click Create.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Copy the Service Account Email</dt><dd><p>On the service account page, copy the Email.
+It looks like: <a class="reference external" href="mailto:my-drive-access&#37;&#52;&#48;your-project-id&#46;iam&#46;gserviceaccount&#46;com">my-drive-access<span>&#64;</span>your-project-id<span>&#46;</span>iam<span>&#46;</span>gserviceaccount<span>&#46;</span>com</a>
+Your browser will download a .json file. Save it securely — you’ll use this in your Python code.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Share the Google Drive File or Folder with the Service Account</dt><dd><p>Go to Google Drive
+Right-click the file or folder you want the service account to access.
+Click “Share”
+Paste the service account email into the share box.
+Set access as Viewer (or Editor if needed).
+Click Send.
+Now the service account has access just like a regular user.</p>
+</dd>
+</dl>
+</li>
+</ul>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">downloadfiles_byserviceaccout</span><span class="p">(</span><span class="s2">&quot;SatelliteImages&quot;</span><span class="p">,</span> <span class="s2">&quot;/home/user/Downloads&quot;</span><span class="p">)</span>
 <span class="go">results [{&#39;id&#39;: &#39;1A2B3C...&#39;, &#39;name&#39;: &#39;SatelliteImages&#39;}]</span>
