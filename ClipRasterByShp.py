@@ -3,19 +3,36 @@ from osgeo import gdal
 def clip_raster_to_cog(input_raster_path, shapefile_path, output_cog_path,
                        compression="LZW", nodata_value=0):
     """
-    Clips a large raster using a shapefile and outputs a Cloud Optimized GeoTIFF (COG).
+    Clips a raster using a vector shapefile boundary and saves it as a 
+    Cloud-Optimized GeoTIFF (COG).
+
+    This function uses GDAL's Warp functionality to:
+    1. Clip an input raster to the extent of a shapefile.
+    2. Apply a NoData value to areas outside the cutline.
+    3. Save the output as a COG with specified compression and tiling.
 
     Args:
-        input_raster_path (str): Path to the input raster file (e.g., .tif).
-        shapefile_path (str): Path to the shapefile to use for clipping (e.g., .shp).
-        output_cog_path (str): Path to the desired output COG file.
-        compression (str, optional): Compression method for the output raster. Defaults to "LZW".
-                                     Common options: LZW, DEFLATE, JPEG, ZSTD.
-        nodata_value (int or float, optional): Value to use for pixels outside the clip area.
-                                               If None, the input raster's nodata value is used
-                                               or a default is applied if not present.
-    """
+        input_raster_path (str): Path to the input raster (.tif or other GDAL-readable format).
+        shapefile_path (str): Path to the vector shapefile used for clipping.
+        output_cog_path (str): Path to save the output Cloud-Optimized GeoTIFF.
+        compression (str, optional): Compression method for output (default: "LZW").
+        nodata_value (int or float, optional): NoData value to assign to clipped areas 
+            (default: 0). If None, the value is read from the input raster.
 
+    Notes:
+        - Uses GDAL's `Warp` with the COG driver.
+        - By default, uses `NearestNeighbour` resampling (recommended for categorical data).
+        - For continuous data, consider using `GRA_Bilinear`.
+        - Requires GDAL 3.1+ for direct COG output.
+        - Sets GDAL cache to 5 GB to optimize performance.
+
+    Example:
+        clip_raster_to_cog(
+            input_raster_path="data/input.tif",
+            shapefile_path="data/boundary.shp",
+            output_cog_path="output/clipped_cog.tif"
+        )
+    """
     gdal.UseExceptions()
     # Set GDAL cache to 5 GB
     gdal.SetCacheMax(5120 * 1024 * 1024)  # 5120 MB = 5 GB

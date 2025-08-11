@@ -3,6 +3,50 @@ import numpy as np
 import os
 
 def reset_pixel_values_to_cog(input_path, cog_path, old_values, new_values, nodata_value=0):
+    """
+    Reset specified pixel values in a raster and save the result as a 
+    Cloud-Optimized GeoTIFF (COG).
+
+    This function reads the input raster in blocks to avoid memory overload, 
+    replaces specified pixel values according to the `old_values` → `new_values` mapping, 
+    writes the modified data to a temporary GeoTIFF, and then converts it to 
+    a Cloud-Optimized GeoTIFF (COG).
+
+    Parameters
+    ----------
+    input_path : str
+        Path to the input raster file (GeoTIFF or similar format).
+    cog_path : str
+        Path where the final Cloud-Optimized GeoTIFF will be saved.
+    old_values : list or tuple of numeric
+        List of pixel values in the raster that need to be replaced.
+    new_values : list or tuple of numeric
+        List of replacement pixel values corresponding to `old_values`. 
+        Must be the same length as `old_values`.
+    nodata_value : numeric, optional
+        The NoData value to set in the output raster. Defaults to 0.
+
+    Notes
+    -----
+    - The function processes the raster block-by-block (default 512×512 pixels) to 
+      minimize memory usage.
+    - Intermediate results are stored in a temporary file (`temp_reset.tif`), 
+      which is deleted after conversion to COG.
+    - Output COG is LZW compressed, internally tiled, and supports BigTIFF if needed.
+    - By default, the function handles 8-bit (`GDT_Byte`) rasters, but this can be 
+      changed to `GDT_Float32` or `GDT_UInt16` depending on the data type.
+
+    Example
+    -------
+    >>> reset_pixel_values_to_cog(
+    ...     input_path='input.tif',
+    ...     cog_path='output_cog.tif',
+    ...     old_values=[1, 2, 3],
+    ...     new_values=[10, 20, 30],
+    ...     nodata_value=0
+    ... )
+    Cloud-Optimized COG created at: output_cog.tif
+    """
     # Create a temporary file to hold modified raster
     temp_path = 'temp_reset.tif'
 

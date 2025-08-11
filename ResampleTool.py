@@ -11,7 +11,8 @@ def resample(input_path,output_path,format,cell_size):
         yRes=cell_size,
         resampleAlg='Nearest Neighbor',
         creationOptions=[
-            'COMPRESS=LZW'
+            'COMPRESS=LZW',
+            'BIGTIFF=YES'
         ]
     )
     print(f'The 30m COG image has been saved at {output_path}')
