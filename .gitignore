@@ -2,7 +2,6 @@
 *.txt 
 *.xlsx
 *.code-workspace
-__pycache__/
 *.py[cod]
 *.pyo
 *.pyd
@@ -23,3 +22,10 @@ __pycache__/
 *.rrd
 *.ige
 *.gitignore
+Makefile
+make.bat
+build_docs.sh
+__pycache__/
+docs/build/
+docs/docs/
+docs/source
