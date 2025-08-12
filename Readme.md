@@ -1,6 +1,6 @@
 # In-Season Crop Mapping Automation
 
-This Python script automates the generation of **in-season crop classification maps** for the Conterminous United States (CONUS) using **Landsat 8/9** and **Sentinel-2** satellite imagery with Google Earth Engine.
+This Python script automates the generation of **In-season crop classification maps** for the Conterminous United States (CONUS) using **Landsat 8/9** and **Sentinel-2** satellite imagery with Google Earth Engine.
 
 ---
 
@@ -9,11 +9,11 @@ This Python script automates the generation of **in-season crop classification m
 - Authenticates and initializes Google Earth Engine (GEE).
 - Defines temporal parameters dynamically based on the current date, focusing on the previous month.
 - Generates trusted training pixel labels from multi-year historical Crop Data Layer (CDL).
-- Runs parallel classification pipelines for Landsat 8/9 and Sentinel-2 using multiprocessing.
+- Runs parallel classification pipelines for Landsat 8/9 and Sentinel-2 using multiprocessing (classification on the cloud, download to local, mosaic to two images).
 - Mosaics Landsat and Sentinel-2 classification results into a 10-meter resolution mosaic.
-- Clips the mosaic to the CONUS boundary shapefile, exporting Cloud-Optimized GeoTIFF (COG).
+- Clips the mosaic using CONUS boundary shapefile, exporting Cloud-Optimized GeoTIFF (COG).
 - Converts clipped COG raster to Erdas Imagine IMG format.
-- Resamples the 10m mosaic to 30m resolution and converts it to Erdas IMG format.
+- Resamples the 10m COG to 30m COG and converts it to Erdas IMG format.
 - Cleans up intermediate mosaic files and local classification tiles.
 - Deletes processed classification files from Google Drive after a delay.
 - Logs script start time, end time, and total elapsed processing time.
@@ -65,6 +65,7 @@ This Python script automates the generation of **in-season crop classification m
     The script uses multiprocessing to parallelize Landsat 8/9 and Sentinel-2 classification for faster execution.
     The CONUS boundary excludes Alaska, Hawaii, and U.S. territories.
     Cloud cover thresholds are set to 10% for Sentinel-2 and 15% for Landsat 8/9 by default.
+    A 1 second waiting time must be set between each download request to Google Cloud.
     There is a built-in wait period (30 seconds) before deleting Google Drive export files to ensure upload completion.
     Exception handling is implemented to continue processing even if some steps fail.
 
@@ -92,3 +93,5 @@ This Python script automates the generation of **in-season crop classification m
     └── Results/
         ├── AutoInseasonL89S2_Mosaic/
         └── AutoInseasonL89S2_Result/
+
+![Workflow Figure](workflow.jpg)
