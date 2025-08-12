@@ -88,7 +88,6 @@ year = start_time.year
 print("Year:", year)
 
 startDate = f"{year}-05-01"
-# endDate = datetime.now().strftime('%Y-%m-%d') 
 
 month_num = start_time.month
 # Move to previous month
@@ -120,7 +119,7 @@ S2tileFolder = 'AutoInseasonS2_Mapping'
 # define local saving folder and path
 local_root_folder = '/home/hli47/InseasonMapping/Results/'
 mosaicfolder_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Mosaic/'
-result_path = '/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Result/'
+result_path = f'/home/hli47/InseasonMapping/Results/AutoInseasonL89S2_Result/{year}'
 
 
 # define mosaic geotif image name for landsat8/9 and sentinel-2

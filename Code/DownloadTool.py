@@ -119,7 +119,7 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
     - The target Drive folder must be shared with the service account email.
     - Downloads are throttled by a `time.sleep(1)` delay to avoid API rate limits.
 
-    **Important - Before program 
+    Important - Before program 
     Create a Google service account, download the JSON key, and share a Google Drive folder or file with the service account's email
     -----
     - Create a Google Cloud Project
@@ -189,7 +189,6 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
     for f in results['files']:
         folder_name = f['name']
         folder_id = f['id']
-        # print("folder_id",folder_id)
         
         # create local folder 
         local_file_path = os.path.join(local_folder, folder_name)

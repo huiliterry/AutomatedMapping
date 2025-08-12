@@ -19,7 +19,7 @@ def authenticate_drive():
     it launches a local browser flow to authenticate the user and store the
     token for future use.
 
-    ** Google Cloud setting and API install (important)
+    Google Cloud setting and API install (important)
     Set Up Google Drive API
     - Go to: https://console.developers.google.com
     - Enable Google Drive API
