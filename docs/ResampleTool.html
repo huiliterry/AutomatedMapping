@@ -97,33 +97,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="ResampleTool.resample">
 <span class="sig-prename descclassname"><span class="pre">ResampleTool.</span></span><span class="sig-name descname"><span class="pre">resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ResampleTool.resample" title="Link to this definition"></a></dt>
-<dd><p>Resample a raster image to a specified cell size and save it in a given format.</p>
-<p>This function uses GDAL’s Warp utility to resample an input raster using the
-Nearest Neighbor method, compress the output, and optionally create a BigTIFF.
-The output raster will have equal x and y resolution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input_path</strong> (<em>str</em>) – Path to the input raster file.</p></li>
-<li><p><strong>output_path</strong> (<em>str</em>) – Path to save the resampled raster file.</p></li>
-<li><p><strong>format</strong> (<em>str</em>) – GDAL-supported output format (e.g., “GTiff”, “COG”).</p></li>
-<li><p><strong>cell_size</strong> (<em>float</em>) – Desired output pixel size (resolution) in the units of the raster’s coordinate system.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>Resampling method: Nearest Neighbor (fast, preserves class values).</p></li>
-<li><p>Output compression: LZW.</p></li>
-<li><p>BIGTIFF is enabled for large files.</p></li>
-<li><p>Make sure GDAL is installed and imported before calling this function.</p></li>
-</ul>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;input.tif&quot;</span><span class="p">,</span> <span class="s2">&quot;output_30m.tif&quot;</span><span class="p">,</span> <span class="s2">&quot;GTiff&quot;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
-<span class="go">The 30m COG image has been saved at output_30m.tif</span>
-</pre></div>
-</div>
-</dd></dl>
+<dd></dd></dl>
 
 </section>
 

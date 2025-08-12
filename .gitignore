@@ -22,10 +22,6 @@
 *.rrd
 *.ige
 *.gitignore
-Makefile
-make.bat
 build_docs.sh
 __pycache__/
-docs/build/
-docs/docs/
-docs/source
+sphnix/
