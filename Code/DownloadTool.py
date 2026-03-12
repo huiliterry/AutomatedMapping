@@ -115,7 +115,7 @@ def downloadfiles_byserviceaccout(target_name, local_folder):
     Notes
     -----
     - The service account JSON key must be stored at:
-      `/home/hli47/InseasonMapping/KEY/ee-huil7073-0802b07b2350.json`
+      `key.json`
     - The target Drive folder must be shared with the service account email.
     - Downloads are throttled by a `time.sleep(1)` delay to avoid API rate limits.
 
