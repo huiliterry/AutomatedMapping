@@ -98,4 +98,4 @@ This Python script automates the generation of **In-season crop classification m
         ├── AutoInseasonL89S2_Mosaic/
         └── AutoInseasonL89S2_Result/
 
-![Architecture Figure](Architecture.Ppng)
+![Architecture Figure](Architecture.jpg)
