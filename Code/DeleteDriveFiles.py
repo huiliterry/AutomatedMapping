@@ -42,9 +42,9 @@ def authenticate_drive():
     """
     creds = None
     if os.path.exists('/home/hli47/InseasonMapping/KEY/token.json'):
-        creds = Credentials.from_authorized_user_file('/home/hli47/InseasonMapping/KEY/token.json', SCOPES)
+        creds = Credentials.from_authorized_user_file('key.json', SCOPES)
     else:
-        flow = InstalledAppFlow.from_client_secrets_file('/home/hli47/InseasonMapping/KEY/deleteDriveCredential.json', SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file('key.json', SCOPES)
         creds = flow.run_local_server(port=0)
         with open('/home/hli47/InseasonMapping/KEY/token.json', 'w') as token:
             token.write(creds.to_json())
