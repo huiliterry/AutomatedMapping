@@ -1,7 +1,8 @@
 # In-Season Crop Mapping Automation
 
 This Python script automates the generation of **In-season crop classification maps** for the Conterminous United States (CONUS) using **Landsat 8/9** and **Sentinel-2** satellite imagery with Google Earth Engine.
-
+Please cite the article when using this automation
+H. Li et al., "Automated In-Season Crop-Type Data Layer Mapping Without Ground Truth for the Conterminous United States Based on Multisource Satellite Imagery," in IEEE Transactions on Geoscience and Remote Sensing, vol. 62, pp. 1-14, 2024, Art no. 4403214, doi: 10.1109/TGRS.2024.3361895.
 ---
 
 ## Features
