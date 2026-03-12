@@ -36,17 +36,17 @@ def authenticate_drive():
     -----
     - Requires `google-api-python-client`, `google-auth-oauthlib`, and `google-auth`.
     - The token is stored at:
-      `/home/hli47/InseasonMapping/KEY/token.json`
+      `token.json`
     - The OAuth client secret file should be:
-      `/home/hli47/InseasonMapping/KEY/deleteDriveCredential.json`
+      `credential.json`
     """
     creds = None
-    if os.path.exists('/home/hli47/InseasonMapping/KEY/token.json'):
+    if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('key.json', SCOPES)
     else:
         flow = InstalledAppFlow.from_client_secrets_file('key.json', SCOPES)
         creds = flow.run_local_server(port=0)
-        with open('/home/hli47/InseasonMapping/KEY/token.json', 'w') as token:
+        with open('token.json', 'w') as token:
             token.write(creds.to_json())
     return build('drive', 'v3', credentials=creds)
 
