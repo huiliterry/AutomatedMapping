@@ -58,7 +58,7 @@ import ee
 # Trigger the authentication flow.
 ee.Authenticate()
 # Initialize the library.
-ee.Initialize(project='ee-huil7073') # replace by your cloud project name
+ee.Initialize(project='project name') # replace by your cloud project name
 
 from datetime import datetime
 import os
