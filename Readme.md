@@ -1,7 +1,7 @@
 # In-Season Crop Mapping Automation
 Please cite the articles when using any source of this automation.
 
-H. Li et al., "Automated In-Season Crop-Type Data Layer Mapping Without Ground Truth for the Conterminous United States Based on Multisource Satellite Imagery," in IEEE Transactions on Geoscience and Remote Sensing, vol. 62, pp. 1-14, 2024, Art no. 4403214, doi: 10.1109/TGRS.2024.3361895.
+H. Li et al., "Automated In-Season Crop-Type Data Layer Mapping Without Ground Truth for the Conterminous United States Based on Multisource Satellite Imagery," in IEEE Transactions on Geoscience and Remote Sensing, vol. 62, pp. 1-14, 2024, Art no. 4403214, doi: 10.1109/TGRS.2024.3361895.(https://ieeexplore.ieee.org/document/10419370)
 
 Li, H., Di, L., Zhang, C. et al. Automated 10-m Resolution In-season Crop-type Data Layer Mapping for Contiguous United States. Sci Data (2026). https://doi.org/10.1038/s41597-026-07099-1
 
